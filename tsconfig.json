@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "lib": ["ES2019"],
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+        "jsx": "react",
+
+        "strictNullChecks": true,
+        "noUnusedLocals": true,
+        "outDir": "build/src",
+    },
+
+    "files": ["./src/index.ts"],
+}

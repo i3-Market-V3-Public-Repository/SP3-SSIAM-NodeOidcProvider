@@ -1,0 +1,427 @@
+#
+# Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+openapi: '3.0.0'
+info:
+  description: >-
+    i3Market - OpenID Connect API.
+    Defines The OpenID Connect Endpoints exposed by AM server.
+  version: 0.1.0
+  title: i3Market - OpenID Connect API
+  contact:
+    email: fernando.roman@upc.edu
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+servers:
+  - url: http://localhost:3000/oidc
+    description: Development server
+
+paths:
+  /.well-known/openid-configuration:
+    get:
+      tags:
+      - OpenID Connect
+      - Discovery
+      summary: Get OpenID Provider configuration information
+      description: Discovery endpoint used by OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: The OpenID Provider Metadata values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenIDProviderMetadata'
+  /jwks:
+    get:
+      tags:
+      - OpenID Connect
+      - Discovery
+      summary: Get JSON Web Key Set
+      description: JWKS endpoint containing the public keys used by OpenID Connect Relying Party to verify any JWT issued by the authorization server.
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: A JSON object that represents a set of JWKs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JWKSet'
+  /auth?response_type=code:
+    get:
+      tags:
+      - OpenID Connect
+      - Authorization Code
+      summary: Authorization Code Flow (initial endpoint)
+      parameters:
+        - in: query
+          name: scope
+          schema:
+            $ref: '#/components/schemas/Scope'
+          required: true
+          description: Scope
+        - in: query
+          name: nonce
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: Nonce -
+        - in: query
+          name: client_id
+          schema:
+            type: string
+          required: true
+          default: oidcCLIENT
+          description: A previously registered client id
+        - in: query
+          name: redirect_uri
+          schema:
+            type: string
+          required: false
+          description: One of the redirect uris registered
+      description: Endpoint used to initiate the Authorization Code flow.
+      responses:
+        302:
+          description: Redirect the user to perform the authentication
+          headers:
+            Location:
+              type: "string"
+              description: Redirect URL
+  /token:
+    post:
+      tags:
+      - OpenID Connect
+      - Authorization Code
+      summary: Access Token via Authorization Code
+      description: It gets an Access Token by using an Authorization Code
+      security:
+        - clientAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+              - grant_type
+              - code
+              - redirect_uri
+              properties:
+                grant_type:
+                  description: The grant type 'authorization_code' MUST be used to generate the Access Token using an Authorization Code.
+                  type: string
+                  enum: ['authorization_code']
+                  default: authorization_code
+                redirect_uri:
+                  description: One of the redirect uris registered
+                  type: string
+                code:
+                  description: Authorization Code
+                  type: string
+      responses:
+        '200':
+          description: JSON containing the access token information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenResponse'
+
+  /session/end:
+    get:
+      tags:
+      - OpenID Connect
+      - Management
+      summary: End the current session
+      description: Asks the user to end the current session
+      responses:
+        '200':
+          description: Logout form
+          content:
+            text/html:
+              schema:
+                type: string
+                example: '<html>HTML text</html>'
+  /me:
+    get:
+      tags:
+      - OpenID Connect
+      - Management
+      summary: Gets User Claim
+      description: Gets the user claim using an access token.
+      security:
+        - accessToken: []
+      responses:
+        '200':
+          description: Claim
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sub:
+                    type: string
+
+components:
+  securitySchemes:
+    clientAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+    accessToken:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+
+  schemas:
+    Scope:
+      type: string
+      enum:
+        - openid
+
+    # Objects
+    OpenIDProviderMetadata:
+      type: object
+      properties:
+        issuer:
+          type: string
+          description: REQUIRED. URL using the https scheme with no query or fragment component that the OP asserts as its Issuer Identifier
+        authorization_endpoint:
+          type: string
+          description: REQUIRED. URL of the OP's OAuth 2.0 Authorization Endpoint
+        token_endpoint:
+          type: string
+          description: URL of the OP's OAuth 2.0 Token Endpoint
+        userinfo_endpoint:
+          type: string
+          description: RECOMMENDED. URL of the OP's UserInfo Endpoint
+        jwks_uri:
+          type: string
+          description: REQUIRED. URL of the OP's JSON Web Key Set [JWK] document.
+        registration_endpoint:
+          type: string
+          description: RECOMMENDED. URL of the OP's Dynamic Client Registration Endpoint
+        scopes_supported:
+          type: string
+          description: RECOMMENDED. JSON array containing a list of the OAuth 2.0 [RFC6749] scope values that this server supports
+        response_types_supported:
+          type: string
+          description: REQUIRED. JSON array containing a list of the OAuth 2.0 response_type values that this OP supports
+        response_modes_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the OAuth 2.0 response_mode values that this OP supports
+        grant_types_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the OAuth 2.0 Grant Type values that this OP supports
+        acr_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the Authentication Context Class References that this OP supports
+        subject_types_supported:
+          type: string
+          description: REQUIRED. JSON array containing a list of the Subject Identifier types that this OP supports
+        id_token_signing_alg_values_supported:
+          type: string
+          description: REQUIRED. JSON array containing a list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT
+        id_token_encryption_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT
+        id_token_encryption_enc_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT
+        userinfo_signing_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) [JWA] supported by the UserInfo Endpoint to encode the Claims in a JWT
+        userinfo_encryption_alg_values_supported:
+          type: string
+          description: ROPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) [JWA] supported by the UserInfo Endpoint to encode the Claims in a JWT
+        userinfo_encryption_enc_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) [JWA] supported by the UserInfo Endpoint to encode the Claims in a JWT
+        request_object_signing_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) supported by the OP for Request Objects
+        request_object_encryption_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects
+        request_object_encryption_enc_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects
+        token_endpoint_auth_methods_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of Client Authentication methods supported by this Token Endpoint
+        token_endpoint_auth_signing_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT
+        display_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the display parameter values that the OpenID Provider supports
+        claim_types_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the Claim Types that the OpenID Provider supports
+        claims_supported:
+          type: string
+          description: RECOMMENDED. JSON array containing a list of the Claim Names of the Claims that the OpenID Provider MAY be able to supply values for
+        service_documentation:
+          type: string
+          description: OPTIONAL. URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider
+        claims_locales_supported:
+          type: string
+          description: OPTIONAL. Languages and scripts supported for values in Claims being returned, represented as a JSON array of BCP47 [RFC5646] language tag values
+        ui_locales_supported:
+          type: string
+          description: OPTIONAL. Languages and scripts supported for the user interface, represented as a JSON array of BCP47 [RFC5646] language tag values
+        claims_parameter_supported:
+          type: boolean
+          description: OPTIONAL. Boolean value specifying whether the OP supports use of the claims parameter, with true indicating support. If omitted, the default value is false
+        request_parameter_supported:
+          type: boolean
+          description: OPTIONAL. Boolean value specifying whether the OP supports use of the request parameter, with true indicating support. If omitted, the default value is false
+        request_uri_parameter_supported:
+          type: boolean
+          description: OPTIONAL. Boolean value specifying whether the OP supports use of the request_uri parameter, with true indicating support. If omitted, the default value is true
+        require_request_uri_registration:
+          type: boolean
+          description: OPTIONAL. Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter
+        op_policy_uri:
+          type: string
+          description: OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP
+        op_tos_uri:
+          type: boolean
+          description: OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service
+    JWKSet:
+      type: object
+      properties:
+        keys:
+          type: array
+          description: The value of the "keys" parameter is an array of JWK values
+          items:
+            $ref: '#/components/schemas/JWK'
+    JWK:
+      type: object
+      properties:
+        kty:
+          type: string
+          description: The "kty" (key type) parameter identifies the cryptographic algorithm family used with the key, such as "RSA" or "EC"
+        use:
+          type: string
+          description: The "use" (public key use) parameter identifies the intended use of the public key
+        key_ops:
+          type: string
+          description: The "key_ops" (key operations) parameter identifies the operation(s) for which the key is intended to be used
+        alg:
+          type: string
+          description: The "alg" (algorithm) parameter identifies the algorithm intended for use with the key
+        kid:
+          type: string
+          description: The "kid" (key ID) parameter is used to match a specific key
+        x5u:
+          type: string
+          description: The "x5u" (X.509 URL) parameter is a URI [RFC3986] that refers to a resource for an X.509 public key certificate or certificate chain [RFC5280]
+        x5c:
+          type: string
+          description: The "x5c" (X.509 certificate chain) parameter contains a chain of one or more PKIX certificates [RFC5280]
+        x5t:
+          type: string
+          description: The "x5t" (X.509 certificate SHA-1 thumbprint) parameter is a base64url-encoded SHA-1 thumbprint (a.k.a. digest) of the DER encoding of an X.509 certificate [RFC5280]
+        x5t#S256:
+          type: string
+          description: The "x5t#S256" (X.509 certificate SHA-256 thumbprint) parameter is a base64url-encoded SHA-256 thumbprint (a.k.a. digest) of the DER encoding of an X.509 certificate [RFC5280]
+
+    # Responses
+    AccessTokenResponse:
+      properties:
+        access_token:
+          type: string
+          description: Access token
+        expires_in:
+          type: integer
+          format: int64
+          description: Time until this access token is valid
+        id_token:
+          type: string
+          description: JWT token
+        scope:
+          type: string
+          description:
+        token_type:
+          type: string
+          description:
+
+    # UserInfo:
+    #   type: object
+    #   properties:
+    #     sub:
+    #       type: string
+    #       description: Subject - Identifier for the End-User at the Issuer
+    #     name:
+    #       type: string
+    #       description: End-User's full name in displayable form including all name parts, possibly including titles and suffixes, ordered according to the End-User's locale and preferences
+    #     given_name:
+    #       type: string
+    #       description: Given name(s) or first name(s) of the End-User
+    #     family_name:
+    #       type: string
+    #       description: Surname(s) or last name(s) of the End-User
+    #     middle_name:
+    #       type: string
+    #       description: Middle name(s) of the End-User
+    #     nickname:
+    #       type: string
+    #       description: Casual name of the End-User that may or may not be the same as the given_name
+    #     preferred_username:
+    #       type: string
+    #       description: Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe
+    #     profile:
+    #       type: string
+    #       description: URL of the End-User's profile page
+    #     picture:
+    #       type: string
+    #       description: URL of the End-User's profile picture
+    #     website:
+    #       type: string
+    #       description: URL of the End-User's Web page or blog
+    #     email:
+    #       type: string
+    #       description: End-User's preferred e-mail address
+    #     email_verified:
+    #       type: boolean
+    #       description: User at the time the verification was performed
+    #     gender:
+    #       type: string
+    #       description: End-User's gender
+    #     birthdate:
+    #       type: string
+    #       description: End-User's birthday, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format
+    #     zoneinfo:
+    #       type: string
+    #       description: String from zoneinfo [zoneinfo] time zone database representing the End-User's time zone
+    #     locale:
+    #       type: string
+    #       description: End-User's locale, represented as a BCP47 [RFC5646] language tag
+    #     phone_number:
+    #       type: string
+    #       description: End-User's preferred telephone number
+    #     phone_number_verified:
+    #       type: boolean
+    #       description: User at the time the verification was performed
+    #     address:
+    #       type: string
+    #       description: End-User's preferred postal address
+    #     updated_at:
+    #       type: integer
+    #       description: Time the End-User's information was last updated
