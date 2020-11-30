@@ -1,8 +1,10 @@
 import { Provider } from "oidc-provider"
 import { set } from "lodash"
 
-import Adapter from "../adapter"
-import config from "../config"
+import Adapter from "@i3-market/adapter"
+import config from "@i3-market/config"
+import logger from "@i3-market/logger"
+
 import configuration from "./configuration"
 
 
@@ -17,5 +19,10 @@ export default async () => {
     }
 
     provider = new Provider(config.issuer, {adapter: Adapter, ...baseOIDCConfig})
+    if(config.revereProxy) {
+        logger.debug(`Enabling reverse proxy`)
+        provider.proxy = true
+    }
+
     return provider
 }

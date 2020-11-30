@@ -2,8 +2,8 @@ import { assign } from "lodash"
 import { Account as IAccount, AccountClaims, CanBePromise, ClaimsParameterMember, FindAccount, AdapterPayload } from "oidc-provider"
 import { compare } from "bcrypt"
 
-import { adapterFactory } from "../adapter"
-import logger from "../logger"
+import { adapterFactory } from "@i3-market/adapter"
+import logger from "@i3-market/logger"
 
 
 interface Profile {

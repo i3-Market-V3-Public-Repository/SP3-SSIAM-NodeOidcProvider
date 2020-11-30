@@ -4,11 +4,18 @@ import * as querystring from "querystring"
 import { inspect } from "util"
 import { isEmpty } from "lodash"
 import Provider, { KoaContextWithOIDC, errors as oidcErrors } from "oidc-provider"
+import { Credentials, SimpleSigner } from "uport-credentials"
+import { message, transport } from "uport-transports"
+import { getResolver } from "ethr-did-resolver"
+import { Resolver } from "did-resolver"
+// import { decodeJWT } from "did-jwt"
 
-import logger from "../logger"
-import Account from "../account"
-import config from "../config"
-import { AccountNotFount, IncorrectPassword } from "../error"
+import logger from "@i3-market/logger"
+import config from "@i3-market/config"
+import { AccountNotFount, IncorrectPassword } from "@i3-market/error"
+import { SocketHandler } from "@i3-market/ws/utils"
+import WebSocketServer from "@i3-market/ws"
+import Account from "@i3-market/account"
 
 
 const { SessionNotFound } = oidcErrors
@@ -23,13 +30,79 @@ const debug = (obj) => querystring.stringify(Object.entries(obj).reduce((acc, [k
 })
 
 
-export default class InteractionController {
+interface SocketParams {
+    uid: string
+}
 
-    constructor(protected provider: Provider) { }
+interface SocketData {
+    hello: string
+}
+
+
+export default class InteractionController {
+    protected credentials: Credentials
+
+    constructor(protected provider: Provider,
+        protected wss: WebSocketServer) { }
+
+    public async initialize() {
+        const providerConfig = { rpcUrl: 'https://rinkeby.infura.io/ethr-did' }
+        const identity = await config.identityPromise
+        this.credentials = new Credentials({
+            did: identity.did,
+            signer: SimpleSigner(identity.privateKey),
+            resolver: new Resolver(getResolver(providerConfig))
+        })
+    }
+
+    // WebSocket Methods
+    socketConnect: SocketHandler<SocketParams> = async (socket, req, next) => {
+        socket.tag(req.params.uid)
+    }
+
+    socketMessage: SocketHandler<SocketParams, SocketData> = async (socket, req, next) => {
+        logger.debug("Message socket")
+        const json = req.json()
+        console.log(json.hello)
+    }
+
+    socketClose: SocketHandler<SocketParams> = async (socket, req, next) => {
+        logger.debug("Close socket")
+    }
+
+    // App Methods
+    callback: RequestHandler = async (req, res, next) => {
+        const { error: err, access_token: accessToken } = req.body
+        const { uid } = req.params
+
+        if (err) {
+            return res.status(403).send(err)
+        }
+
+        logger.debug(`Received the access token for the interaction "${uid}"`)
+        const credentials = await this.credentials.authenticateDisclosureResponse(accessToken)
+
+        // TODO: Verify mandatory credentials
+        console.log(credentials)
+
+        // const didDocument = await this.credentials.resolver.resolve(credentials.did)
+        // console.log(didDocument)
+
+        // TODO: Finish login here
+        // TODO: Consent accepted here
+
+        const socket = this.wss.get(uid)
+        if(!socket) {
+            logger.debug('The client was disconnected before sending the did...')
+        } else {
+            socket.send(credentials.did)
+        }
+    }
 
     handleInteraction: RequestHandler = async (req, res, next) => {
+        console.log("hello")
         const {
-            uid, prompt, params, session,
+            uid, prompt, params, session
         } = await this.provider.interactionDetails(req, res)
 
         const client = await this.provider.Client.find(params.client_id)
@@ -68,13 +141,28 @@ export default class InteractionController {
 
                 return res.render('select_account', {
                     ...options,
-                    email,
+                    email
                 })
             }
 
             case 'login': {
+                // NOTE: To work with uPort, the callback URL MUST use TLS
+                const callbackUrl = `https://${req.get('host')}/interaction/${uid}/callback`
+                const reqToken = await this.credentials.createDisclosureRequest({
+                    // TODO: claims Requirements for claims requested from a user. See Claims Specs and Verified Claims
+                    notifications: true,
+                    callbackUrl
+                })
+                logger.debug(reqToken)
+
+                const query = message.util.messageToURI(reqToken)
+                const uri = message.util.paramsToQueryString(query, {callback_type: 'post'})
+                const qr =  transport.ui.getImageDataURI(uri)
+
                 logger.debug(`Login interaction received`)
-                return res.render('login', options)
+                return res.render('login', {
+                    ...options, qr
+                })
             }
 
             case 'consent': {
@@ -94,20 +182,25 @@ export default class InteractionController {
         const { prompt: { name } } = await this.provider.interactionDetails(req, res)
         assert.equal(name, 'login')
 
-        logger.debug(`Check login for "${req.body.login}"`)
-        const account = await Account.findByLogin(req.body.login)
-        if(!account) {
-            throw new AccountNotFount(req.body.login)
+        if(req.body.did) {
+            logger.debug(`Check login for "${req.body.did}"`)
+        } else {
+            logger.debug(`Check login for "${req.body.login}"`)
+            const account = await Account.findByLogin(req.body.login)
+            if(!account) {
+                throw new AccountNotFount(req.body.login)
+            }
+
+            if(!await account.checkPassword(req.body.password)) {
+                throw new IncorrectPassword(req.body.login)
+            }
         }
 
-        if(!await account.checkPassword(req.body.password)) {
-            throw new IncorrectPassword(req.body.login)
-        }
-
+        // TODO: Use interaction id as account id
         const result = {
             select_account: {}, // make sure its skipped by the interaction policy since we just logged in
             login: {
-                account: account.accountId,
+                account: req.body.did,
             },
         }
 
@@ -138,6 +231,7 @@ export default class InteractionController {
         const { prompt: { name } } = await this.provider.interactionDetails(req, res)
         assert.equal(name, 'consent')
 
+        // TODO: Set rejected claims comming from uport (credentials.invalid)
         const consent = {
             // any scopes you do not wish to grant go in here
             //   otherwise details.scopes.new.concat(details.scopes.accepted) will be granted
@@ -167,6 +261,7 @@ export default class InteractionController {
 
 
     onError: ErrorRequestHandler = async (err, req, res, next) => {
+        // TODO: Handle errors properly
         if (err instanceof SessionNotFound) {
             // handle interaction expired / session not found error
             return res.status(401).send("<strong>The session has been expired</strong>")

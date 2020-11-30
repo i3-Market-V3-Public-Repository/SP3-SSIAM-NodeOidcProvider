@@ -3,10 +3,12 @@ import { MongoClient, Db } from "mongodb"
 import { snakeCase } from "lodash"
 import { AdapterPayload } from "oidc-provider"
 
-import config from "../config"
+import config from "@i3-market/config"
+import logger from "@i3-market/logger"
+
+
 import { Adapter } from "./adapter"
 import adapterFactory from "./adapter-factory"
-import logger from "../logger"
 
 
 let DB: Db

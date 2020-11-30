@@ -28,7 +28,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 
 servers:
-  - url: http://localhost:3000/oidc
+  - url: /oidc
     description: Development server
 
 paths:
@@ -95,6 +95,7 @@ paths:
           name: redirect_uri
           schema:
             type: string
+          default: http://localhost:3001/oauth/callback
           required: false
           description: One of the redirect uris registered
       description: Endpoint used to initiate the Authorization Code flow.

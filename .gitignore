@@ -1,3 +1,11 @@
-/db/mongo
+
 /node_modules
 /build
+
+# Ignore development configuration files
+/.vscode
+/misc/dev.env
+/misc/initial-state.js
+
+# Ignore docker volumes
+/volumes

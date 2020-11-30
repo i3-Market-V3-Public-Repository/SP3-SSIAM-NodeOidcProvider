@@ -1,2 +1,2 @@
 export { default as getProvider } from "./provider"
-export { default } from "./router"
+export { default } from "./endpoint"

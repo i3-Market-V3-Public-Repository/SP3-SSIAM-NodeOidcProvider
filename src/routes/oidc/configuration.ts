@@ -1,9 +1,10 @@
-import { loadJSON } from "../util"
 import { Configuration } from "oidc-provider"
 
-import config from "../config"
+import { loadJSON } from "@i3-market/util"
+import config from "@i3-market/config"
+import Account from "@i3-market/account"
+
 import interactions from "./interactions"
-import Account from "../account"
 
 
 export default async (): Promise<Configuration> => {
@@ -16,6 +17,7 @@ export default async (): Promise<Configuration> => {
         findAccount: Account.findAccount,
         interactions,
 
+        // TODO: Remove userinfo endpoint
         // TODO: Implement this function to add custom error views
         // renderError: async (ctx, out, error) => {
         //   return

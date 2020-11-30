@@ -1,3 +1,12 @@
+import * as fs from "fs"
+import { promisify } from "util"
+import { Credentials } from "uport-credentials"
+
+type Identity = ReturnType<typeof Credentials.createIdentity>
+type ConvertFunction<T> = (value: string) => T
+
+const readFilePromise = promisify(fs.readFile)
+// type Identity = ReturnType<Credentials>
 
 class Config {
     protected defaults: {[key: string]: string}
@@ -6,16 +15,23 @@ class Config {
         this.defaults = {
             "NODE_ENV": "development",
 
-            "OIDC_PROVIDER_ISSUER": "http://localhost:3000",
+            "OIDC_PROVIDER_ISSUER": "https://localhost:3000",
             "OIDC_PROVIDER_PORT": "3000",
+            "OIDC_PROVIDER_REVER_PROXY": "false",
 
             "OIDC_PROVIDER_DB_HOST": "localhost",
             "OIDC_PROVIDER_DB_PORT": "27017",
 
             "COOKIES_KEYS": "gqmYWsfP6Dc6wk6J,Xdmqh4JBDuAc43xt,8WxYvAGmPuEvU8Ap",
-            "JWKS_KEYS_PATH": "./misc/jwks.json"
+            "JWKS_KEYS_PATH": "./misc/jwks.json",
+            "IDENTITY_PATH": "./misc/identity.json"
         }
     }
+
+    // Conversion functions
+    protected fromBoolean: ConvertFunction<boolean> = (v) => v.toLocaleLowerCase() === 'true'
+    protected fromArray: ConvertFunction<string[]> = (v) => v.split(',')
+    protected fromInteger: ConvertFunction<number> = parseInt
 
     /**
      * Gets a configuration property comming from os environment or the
@@ -27,7 +43,7 @@ class Config {
      */
     get(name: string): string
     get<T>(name: string, convert: (value: string) => T): T
-    get<T = string>(name: string, convert?: (value: string) => T): T {
+    get<T = string>(name: string, convert?: ConvertFunction<T>): T {
         const value = process.env[name] || this.defaults[name] || ''
         if(!convert) {
             return value as unknown as T
@@ -54,7 +70,14 @@ class Config {
      * @property Server port
      */
     get port(): number {
-        return this.get("OIDC_PROVIDER_PORT", parseInt)
+        return this.get("OIDC_PROVIDER_PORT", this.fromInteger)
+    }
+
+    /**
+     * @property Reverse proxy
+     */
+    get revereProxy(): boolean {
+        return this.get("OIDC_PROVIDER_REVERSE_PROXY", this.fromBoolean)
     }
 
     /**
@@ -73,7 +96,7 @@ class Config {
      * @property Keys used by the OIDC to sign the cookies
      */
     get cookiesKeys(): string[] {
-        return this.get("COOKIES_KEYS", (v) => v.split(","))
+        return this.get("COOKIES_KEYS", this.fromArray)
     }
 
     /**
@@ -81,6 +104,22 @@ class Config {
      */
     get jwksKeysPath(): string {
         return this.get("JWKS_KEYS_PATH")
+    }
+
+    /**
+     * @property It is used to create tunnels so the OIDC server uses a public https domain when testing.
+     */
+    get useNgrok(): boolean {
+        return this.get("OIDC_PROVIDER_NGROK", this.fromBoolean)
+    }
+
+    /**
+     * @property Get identity promise. This identity contains a DID and its associated privateKey
+     */
+    get identityPromise(): Promise<Identity> {
+        return readFilePromise(this.get("IDENTITY_PATH")).then((value) => {
+            return JSON.parse(value.toString())
+        })
     }
 }
 

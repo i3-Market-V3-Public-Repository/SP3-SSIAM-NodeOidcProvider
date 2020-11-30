@@ -6,9 +6,9 @@ services:
     container_name: oidc-db
     working_dir: /data/scripts
     volumes:
-      - "$PWD/db/mongo:/data/db"
-      - "$PWD/db/scripts:/data/scripts"
-    env_file: $PWD/misc/env
+      - "$PWD/volumes/mongo:/data/db"
+      - "$PWD/scripts/db:/data/scripts"
+    env_file: $PWD/misc/dev.env
     ports:
         - 27017:27017
 
@@ -17,8 +17,9 @@ services:
     container_name: oidc-db-initializer
     working_dir: /data/scripts
     volumes:
-      - "$PWD/db/scripts:/data/scripts"
-    env_file: $PWD/misc/env
+      - "$PWD/scripts/db:/data/scripts"
+      - "$PWD/misc/initial-state.js:/data/scripts/initial-state.js"
+    env_file: $PWD/misc/dev.env
     environment:
       - WAIT_HOSTS=db:27017
       - WAIT_HOSTS_TIMEOUT=300
@@ -28,61 +29,44 @@ services:
       - db
     entrypoint: ./initialize.sh
 
-  resolver:
-    image: dvdarias/docker-hoster
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock
-      - /etc/hosts:/tmp/hosts
+  # resolver:
+  #   image: dvdarias/docker-hoster
+  #   volumes:
+  #     - /var/run/docker.sock:/tmp/docker.sock
+  #     - /etc/hosts:/tmp/hosts
 
-  oidc-provider-dev:
+  oidc-provider:
     image: node:lts
-    container_name: oidc-provider-dev
-    hostname: oidc-provider
-    environment:
-      - OIDC_PROVIDER_PORT=80
+    container_name: oidc-provider
     ports:
-      - 3000:80
-    external_links:
-      - oidc-provider
+      - 3000:3000
+      - 127.0.0.1:9229:9229
     links:
       - db
       - db-initialize
     working_dir: /usr/src/app
+    environment:
+      - OIDC_PROVIDER_REVERSE_PROXY=true
     volumes:
       - "$PWD:/usr/src/app/"
-    command: "npm run run:dev"
-
-  oidc-provider:
-    build: .
-    container_name: oidc-provider
-    env_file: $PWD/misc/env
-    environment:
-      - OIDC_PROVIDER_PORT=80
-    volumes:
-      - "$PWD/misc:/usr/src/app/misc"
-    ports:
-      - 3000:80
-    external_links:
-      - oidc-provider
-    links:
-      - db
-      - db-initialize
+      - "$PWD/volumes/ssh:/root/.ssh"
+    command: "./scripts/start.sh"
 
   oidc-rp:
     image: oidc-rp
-    links:
-      - oidc-provider-dev:oidc-provider
+    depends_on:
+      - oidc-provider
     ports:
-      - 7080:7080
-    env_file: $PWD/misc/env
+      - 3001:7080
+    env_file: $PWD/misc/dev.env
 
   keycloak:
     image: quay.io/keycloak/keycloak:11.0.2
     container_name: keycloak
-    links:
-      - oidc-provider-dev:oidc-provider
+    depends_on:
+      - oidc-provider
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
     ports:
-      - 3001:8080
+      - 3002:8080

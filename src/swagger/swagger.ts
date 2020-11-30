@@ -3,7 +3,7 @@ import { Router } from 'express'
 // import { middleware as openapiValidator } from 'express-openapi-validator'
 import * as swaggerUI from 'swagger-ui-express'
 
-import { loadYAML } from "../util"
+import { loadYAML } from "@i3-market/util"
 
 
 export const initSwaggerMiddlware = async (

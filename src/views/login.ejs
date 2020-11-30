@@ -24,6 +24,7 @@
     - or -
 </div>
 <% } %>
+<% if (locals.useAccounts) { %>
 <form autocomplete="off" action="/interaction/<%= uid %>/login" method="post">
     <input required type="text" name="login" placeholder="Enter any login" <% if (!params.login_hint) { %>autofocus="on"
         <% } else { %> value="<%= params.login_hint %>" <% } %>>
@@ -32,3 +33,8 @@
 
     <button type="submit" class="login login-submit">Sign-in</button>
 </form>
+<% } %>
+<% if (locals.qr) { %>
+<div class="qr"><img src="<%- locals.qr %>"/></div>
+<script src="/js/login.js"></script>
+<% } %>

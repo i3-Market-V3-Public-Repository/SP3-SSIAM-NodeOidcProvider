@@ -43,6 +43,10 @@ OIDC_PROVIDER_DB_PORT=27017
 OIDC_PROVIDER_DB_USERNAME=someone
 OIDC_PROVIDER_DB_PASSWORD=a-password
 OIDC_PROVIDER_DB_DATABASE=mydb
+
+# Reverse proxy. More info about how to configure te reverse proxy on:
+# https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#trusting-tls-offloading-proxies
+OIDC_PROVIDER_REVERSE_PROXY=false
 ```
 
 ## Development

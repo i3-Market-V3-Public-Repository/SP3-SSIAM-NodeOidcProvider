@@ -9,6 +9,11 @@
         "strictNullChecks": true,
         "noUnusedLocals": true,
         "outDir": "build/src",
+
+        "baseUrl": ".",
+        "paths": {
+            "@i3-market/*": ["src/*"],
+        }
     },
 
     "files": ["./src/index.ts"],

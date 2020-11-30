@@ -10,12 +10,11 @@ const clients = [
         // 'implicit'
       ],
       redirect_uris: [
-        // 'https://somewhere.i3-market.eu/oidcLogin',
-        'http://oidc-rp:7080/oauth/callback',
-        'http://keycloak:8080/auth/realms/master/broker/oidc/endpoint',
+        'http://localhost:3001/oauth/callback', // Custom rp client used for testing
+        'http://localhost:3002/auth/realms/master/broker/oidc/endpoint', // Keycloak rp client for testing
       ],
       post_logout_redirect_uris: [
-        "http://oidc-rp:7080/logout/callback"
+        "http://localhost:3001/logout/callback"
       ]
     }
   }
