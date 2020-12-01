@@ -89,3 +89,11 @@ docker-compose up -d oidc-rp
 #  - NOTE: Only working on linux
 docker-compose up -d resolver
 ```
+
+There are an environment example and database initial state files. To start a development environment copy them:
+
+```bash
+cd misc
+cp template.dev dev.env
+cp initial-state.template.js initial-state.js
+```

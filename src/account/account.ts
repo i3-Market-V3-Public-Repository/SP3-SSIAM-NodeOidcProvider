@@ -53,8 +53,14 @@ export default class Account implements IAccount {
 
     static findAccount: FindAccount = async (ctx, sub, token) => {
         logger.debug(`Find account '${sub}'`)
-        const adapter = adapterFactory.createIfNotExists(Account.adapterName)
-        const record = await adapter.find(sub)
+        const record = {
+            accountId: sub,
+            profile: {
+                email: "non-existent@i3-market.eu"
+            }
+        }
+        // const adapter = adapterFactory.createIfNotExists(Account.adapterName)
+        // const record = await adapter.find(sub)
 
         if (record) {
             return new Account(record)

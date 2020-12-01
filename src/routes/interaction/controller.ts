@@ -3,7 +3,7 @@ import { strict as assert } from "assert"
 import * as querystring from "querystring"
 import { inspect } from "util"
 import { isEmpty } from "lodash"
-import Provider, { KoaContextWithOIDC, errors as oidcErrors } from "oidc-provider"
+import Provider, { KoaContextWithOIDC, errors as oidcErrors, InteractionResults } from "oidc-provider"
 import { Credentials, SimpleSigner } from "uport-credentials"
 import { message, transport } from "uport-transports"
 import { getResolver } from "ethr-did-resolver"
@@ -95,12 +95,15 @@ export default class InteractionController {
         if(!socket) {
             logger.debug('The client was disconnected before sending the did...')
         } else {
+            // this.provider.setProviderSession(req, res, {
+
+            // })
             socket.send(credentials.did)
+            socket.close()
         }
     }
 
     handleInteraction: RequestHandler = async (req, res, next) => {
-        console.log("hello")
         const {
             uid, prompt, params, session
         } = await this.provider.interactionDetails(req, res)
@@ -197,10 +200,11 @@ export default class InteractionController {
         }
 
         // TODO: Use interaction id as account id
-        const result = {
+        const result: InteractionResults = {
             select_account: {}, // make sure its skipped by the interaction policy since we just logged in
             login: {
                 account: req.body.did,
+                remember: false
             },
         }
 

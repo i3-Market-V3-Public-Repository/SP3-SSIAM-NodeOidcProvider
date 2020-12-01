@@ -44,8 +44,9 @@ export async function main() {
     /**
      * TODO:
      * Force proto https if reverse proxy. Header x-forwarded-proto must be setted by the proxy
+     * Only use this option on development enviromnent!
      */
-    if(config.revereProxy) {
+    if(config.revereProxy && !config.isProd) {
         app.use((req, res, next) => {
             req.headers['x-forwarded-proto'] = 'https'
             next()
