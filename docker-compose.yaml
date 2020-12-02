@@ -49,6 +49,7 @@ services:
       - OIDC_PROVIDER_REVERSE_PROXY=true
     volumes:
       - "$PWD:/usr/src/app/"
+      - "$PWD/volumes/node_modules:/usr/src/app/node_modules"
       - "$PWD/volumes/ssh:/root/.ssh"
     command: "./scripts/start.sh"
 
