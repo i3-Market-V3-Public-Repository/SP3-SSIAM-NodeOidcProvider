@@ -98,6 +98,18 @@ paths:
           default: http://localhost:3001/oauth/callback
           required: false
           description: One of the redirect uris registered
+        - in: query
+          name: code_challenge
+          schema:
+            type: string
+          required: false
+          description: Juan will fill it
+        - in: query
+          name: code_challenge_method
+          schema:
+            type: string
+          required: false
+          description: Juan will fill it
       description: Endpoint used to initiate the Authorization Code flow.
       responses:
         302:
@@ -113,8 +125,8 @@ paths:
       - Authorization Code
       summary: Access Token via Authorization Code
       description: It gets an Access Token by using an Authorization Code
-      security:
-        - clientAuth: []
+      # security:
+      #   - clientAuth: []
       requestBody:
         required: true
         content:
@@ -136,6 +148,12 @@ paths:
                   type: string
                 code:
                   description: Authorization Code
+                  type: string
+                client_id:
+                  description: Juan will fill it
+                  type: string
+                code_verifier:
+                  description: Juan will fill it
                   type: string
       responses:
         '200':

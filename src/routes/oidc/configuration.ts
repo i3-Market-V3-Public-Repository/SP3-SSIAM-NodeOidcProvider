@@ -5,12 +5,13 @@ import config from "@i3-market/config"
 import Account from "@i3-market/account"
 
 import interactions from "./interactions"
+import logger from "@i3-market/logger"
 
 
 export default async (): Promise<Configuration> => {
     const keys = await loadJSON(config.jwksKeysPath)
     if(!keys) {
-        console.error("JWKS file not fount")
+        logger.error("JWKS file not fount")
     }
 
     return {
@@ -22,6 +23,10 @@ export default async (): Promise<Configuration> => {
         // renderError: async (ctx, out, error) => {
         //   return
         // },
+
+        pkce: {
+            methods: ['S256']
+        },
 
         claims: {
             openid: ['sub', 'profile']
