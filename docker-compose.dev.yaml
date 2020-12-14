@@ -2,7 +2,6 @@ version: '3.7'
 
 services:
   oidc-provider-app:
-    container_name: oidc-provider-app
     build: 
       context: .
       dockerfile: ./Dockerfile.dev
@@ -10,6 +9,7 @@ services:
         UID: 1000
         GID: 1000
     image: i3market/oidc-provider-dev
+    container_name: oidc-provider-app
     volumes:
       - ./app:/app
     ports:
@@ -23,9 +23,7 @@ services:
       OIDC_PROVIDER_DB_DATABASE: oidp
       OIDC_PROVIDER_REVERSE_PROXY: 0
     command:
-      - npm
-      - run
-      - start
+      - ./scripts/start.sh
     networks:
       - oidc-net
     depends_on:
