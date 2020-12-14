@@ -1,2 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+export USER_ID=`id -u`
+export GROUP_ID=`id -g`
 docker-compose -f docker-compose.dev.yaml up oidc-provider-app
+docker-compose -f docker-compose.dev.yaml stop oidc-provider-db

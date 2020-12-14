@@ -1,27 +1,28 @@
-version: '3.7'
+version: '3.6'
 
 services:
   oidc-provider-app:
     build: 
       context: .
-      dockerfile: ./Dockerfile.dev
       args: 
-        UID: 1000
-        GID: 1000
+        USER_ID: ${USER_ID-1000}
+        GROUP_ID: ${GROUP_ID-1000}
+      dockerfile: ./Dockerfile.dev
     image: i3market/oidc-provider-dev
     container_name: oidc-provider-app
-    volumes:
-      - ./app:/app
-    ports:
-      - 127.0.0.1:3000:3000
-      - 127.0.0.1:9229:9229
-    environment:
+    environment: 
       OIDC_PROVIDER_DB_HOST: oidc-provider-db
       OIDC_PROVIDER_DB_PORT: 27017
       OIDC_PROVIDER_DB_USERNAME: oidp
       OIDC_PROVIDER_DB_PASSWORD: QGZ4w625UMufe2QT
       OIDC_PROVIDER_DB_DATABASE: oidp
       OIDC_PROVIDER_REVERSE_PROXY: 1
+    volumes:
+      - ./app:/app
+      - oidc-ssh:/ssh
+    ports:
+      - 127.0.0.1:3000:3000
+      - 127.0.0.1:9229:9229
     command:
       - ./scripts/start.sh
     networks:
@@ -44,7 +45,9 @@ services:
       - oidc-mongo:/data/db
       - ./db/scripts:/data/scripts
       - ./db/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    command: --quiet --setParameter logLevel=0
 networks:
   oidc-net:
 volumes:
   oidc-mongo:
+  oidc-ssh:

@@ -2,25 +2,68 @@
 
 An OpenID Provider for i3-Market.
 
+## Development
+
+A just-working version using a mongodb initialized with the content in `db/scripts/mongo-init.js`.
+
+Just run. The first time it will take a while (be patience), since it has to build images and download all the npn dependencies.
+
+```console
+./docker-dev-start
+```
+
+The OAS documentation can be accessed on [http://localhost:3000/oidc/api-spec/ui](http://localhost:3000/oidc/api-spec/ui).
+
+You can stop the container at any time with `Ctrl-C`.
+
+If you want to delete and prune all the created images, containers, networks, volumes, just run
+
+```console
+./docker-dev-prune
+```
+
+Since the `app` directory is shared with the docker container with mapped user permissions, you can just edit any files in the `app` directory locally. The container will be running `ts-node` and `nodemon` to directly execute the source code and refresh the server if any file has changed. You can also attach any debugger since at default port 9229.
+
+### Development scripts
+
+Besides rebuilding, you can execute any command in the `cloud-wallet-server` container:
+
+- to execute it in the running container:
+
+    ```console
+    docker-compose exec cloud-wallet-server <command>
+    ```
+
+- to create and delete on-the-fly a new container (that will update the same files):
+
+    ```console
+    docker-compose run --rm --no-deps cloud-wallet-server <command>
+    ```
+
+Since `npm` and `node` are likely to be needed, if your OS allows you to execute shell scripts, you can just also use the `npm` and `node` scripts provided for convenience.
+
+```console
+$ ./npm -v
+6.14.8
+$ ./node -v
+v14.15.1
+```
+
 ## Production
 
 To build the typescript and prepare copy all the needed files into the build folder execute the command:
 
-```bash
+```console
 npm run build
 ```
 
 To build a docker image use the command:
 
-```bash
-# The image that will be used with the docker-compose file
-npm run docker
-
-# Or build it yourselve
+```console
 docker build . -t i3-market-oidc-provider
 ```
 
-## Configuration
+### Configuration
 
 To configure the server use the following environmental variables:
 
@@ -49,27 +92,7 @@ OIDC_PROVIDER_DB_DATABASE=mydb
 OIDC_PROVIDER_REVERSE_PROXY=false
 ```
 
-## Development
-
-There is also a development launch command. It uses *ts-node* and *nodemon* to directly execute the source code and refresh the server if any file has changed. The OAS documentation can be accessed on [localhost:3000/oidc/docs](http://localhost:3000/oidc/docs).
-
-The shortcut command is:
-
-```bash
-npm run run:dev
-```
-
-The *oidc-provider* needs a *mongo* database to work, so we provide a preconfigured docker compose service. To execute it use the command:
-
-```bash
-# Just execute
-docker-compose up -d db
-
-# Execution + Initialization
-#  - It will check if the database is already initialized
-#  - The initial values for clients and accounts are placed in db/scripts/initial-state.js
-docker-compose up -d db-initialize
-```
+## Additional testing
 
 To perform more complex manual tests, we also provide a docker compose service so different images are connected in the same network.
 

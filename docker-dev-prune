@@ -1,3 +1,5 @@
 #!/bin/sh
-docker-compose -f docker-compose.dev.yaml run --rm --no-deps oidc-provider-app npm run clean
+export USER_ID=`id -u`
+export GROUP_ID=`id -g`
+rm -Rf app/node_modules app/build
 docker-compose -f docker-compose.dev.yaml down --rmi all --remove-orphans --volumes
