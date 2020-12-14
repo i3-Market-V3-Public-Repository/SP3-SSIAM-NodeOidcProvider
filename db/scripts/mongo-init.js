@@ -16,7 +16,8 @@ const clients = [
       ],
       post_logout_redirect_uris: [
         "http://oidc-rp:7080/logout/callback"
-      ]
+      ],
+      token_endpoint_auth_method: 'none'
     }
   }
 ]

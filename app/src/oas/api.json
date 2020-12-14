@@ -316,7 +316,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "client_id1"
+            "example": "oidcCLIENT"
           },
           {
             "name": "redirect_uri",
@@ -326,7 +326,7 @@
             "schema": {
               "type": "string",
               "format": "uri",
-              "example": "https://mywebapp.com/auth/callback"
+              "example": "http://oidc-rp:7080/oauth/callback"
             }
           },
           {
