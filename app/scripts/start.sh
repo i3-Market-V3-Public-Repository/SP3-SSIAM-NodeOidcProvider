@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ ! -f "$HOME/.ssh/id_rsa" ]; then
-    ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N ""
+    ssh-keygen -b 2048 -t rsa -f /ssh/id_rsa -q -N ""
 fi
 
 if [ -z "$(ls -A ./node_modules 2>/dev/null)"  ]; then
@@ -8,6 +8,6 @@ if [ -z "$(ls -A ./node_modules 2>/dev/null)"  ]; then
     npm i
 fi
 
-ssh-keyscan ssh.localhost.run >> $HOME/.ssh/known_hosts
-ssh -n -R 80:localhost:3000 ssh.localhost.run &
+ssh-keyscan ssh.localhost.run > $HOME/.ssh/known_hosts
+ssh -n -R 80:localhost:3000 -i /ssh/id_rsa ssh.localhost.run &
 npm start

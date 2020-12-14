@@ -1,16 +1,18 @@
 FROM node:14
 
-ARG UID=1000
-ARG GID=1000
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 
 WORKDIR /app
 
-RUN groupadd --gid ${GID} appuser 2>&1; exit 0
-RUN useradd --uid ${UID} --gid ${GID} --shell /bin/bash appuser 2>&1; exit 0
+USER root
+RUN mkdir /ssh && chmod 777 /app /ssh
+RUN groupadd --gid ${GROUP_ID} appuser; exit 0
+RUN if [ "$UID" != "S{USER_ID}" ]; then echo ${USER_ID} > .uid; useradd -g ${GROUP_ID} --create-home --uid $(cat .uid) appuser; rm .uid; fi
 
 EXPOSE 3000
 EXPOSE 9229
 
-USER ${UID}
+USER ${USER_ID}:${GROUP_ID}
 
 CMD ["npm", "run", "start"]
