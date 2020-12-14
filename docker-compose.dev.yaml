@@ -42,6 +42,7 @@ services:
       - 27017:27017
     volumes:
       - oidc-mongo:/data/db
+      - ./db/scripts:/data/scripts
       - ./db/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 networks:
   oidc-net:

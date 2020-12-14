@@ -24,7 +24,10 @@ export default async (): Promise<Configuration> => {
     // },
 
     pkce: {
-      methods: ['S256']
+      methods: ['S256'],
+      required: (ctx, client) => {
+        return client.tokenEndpointAuthMethod === 'none';
+      }
     },
 
     claims: {
