@@ -6,7 +6,7 @@ ARG GID=1000
 WORKDIR /app
 
 RUN groupadd --gid ${GID} appuser 2>&1; exit 0
-RUN useradd --uid ${UID} --gid ${GID} --shell /bin/bash --no-create-home --home-dir /app appuser 2>&1; exit 0
+RUN useradd --uid ${UID} --gid ${GID} --shell /bin/bash appuser 2>&1; exit 0
 
 EXPOSE 3000
 EXPOSE 9229

@@ -8,5 +8,6 @@ if [ -z "$(ls -A ./node_modules)"  ]; then
     npm i
 fi
 
-npm start &
-ssh -R 80:localhost:3000 ssh.localhost.run
+ssh-keyscan ssh.localhost.run >> $HOME/.ssh/known_hosts
+ssh -n -R 80:localhost:3000 ssh.localhost.run &
+npm start
