@@ -1,11 +1,11 @@
 
-/node_modules
-/build
+/app/node_modules
+/app/build
 
 # Ignore development configuration files
-/.vscode
-/misc/dev.env
-/misc/initial-state.js
+.vscode
+/app/misc/dev.env
+/app/misc/initial-state.js
 
 # Ignore docker volumes
 /volumes

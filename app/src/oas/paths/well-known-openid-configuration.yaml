@@ -1,0 +1,161 @@
+openapi: '3.0.3'
+info:
+  description: The API of the i3Market OpenID Connect Provider. 
+  version: 0.9.0
+  title: i3-market OpenID Connect Provider API
+  contact:
+    name: Fernando Román García, Juan Hernández Serrano
+    email: fernando.roman@upc.edu
+
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+servers:
+  - url: http://localhost:3000/oidc
+    description: Local testing server
+
+tags:
+  - name: OIDC Core
+    description: |
+      The OpenID Connect Core 1.0 defines the core OpenID Connect functionality: authentication built on top of OAuth 2.0 and the use of Claims to communicate information about the End-User. It also describes the security and privacy considerations for using OpenID Connect.
+    externalDocs:
+      url: https://openid.net/specs/openid-connect-core-1_0.html
+  - name: OIDC Discovery
+    description: The OpenID Connect Discovery 1.0 specification defines a mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
+    externalDocs:
+      url: https://openid.net/specs/openid-connect-discovery-1_0.html
+
+paths:
+  /.well-known/openid-configuration:
+    get:
+      tags:
+      - OIDC Discovery
+      summary: Get OpenID Provider configuration information
+      description: Discovery endpoint used by OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
+      responses:
+        '200':
+          description: The OpenID Provider Metadata values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenIDProviderMetadata'
+
+components:
+  schemas:
+    OpenIDProviderMetadata:
+      title: OpenIDProviderMetadata
+      type: object
+      properties:
+        issuer:
+          type: string
+          description: REQUIRED. URL using the https scheme with no query or fragment component that the OP asserts as its Issuer Identifier
+        authorization_endpoint:
+          type: string
+          description: REQUIRED. URL of the OP's OAuth 2.0 Authorization Endpoint
+        token_endpoint:
+          type: string
+          description: URL of the OP's OAuth 2.0 Token Endpoint. This is REQUIRED unless only the Implicit Flow is used.
+        userinfo_endpoint:
+          type: string
+          description: RECOMMENDED. URL of the OP's UserInfo Endpoint. This URL MUST use the https scheme and MAY contain port, path, and query parameter components.
+        jwks_uri:
+          type: string
+          description: REQUIRED. URL of the OP's JSON Web Key Set [JWK] document. This contains the signing key(s) the RP uses to validate signatures from the OP. The JWK Set MAY also contain the Server's encryption key(s), which are used by RPs to encrypt requests to the Server. When both signing and encryption keys are made available, a use (Key Use) parameter value is REQUIRED for all keys in the referenced JWK Set to indicate each key's intended usage. Although some algorithms allow the same key to be used for both signatures and encryption, doing so is NOT RECOMMENDED, as it is less secure. The JWK x5c parameter MAY be used to provide X.509 representations of keys provided. When used, the bare key values MUST still be present and MUST match those in the certificate.
+        registration_endpoint:
+          type: string
+          description: RECOMMENDED. URL of the OP's Dynamic Client Registration Endpoint
+        scopes_supported:
+          type: string
+          description: RECOMMENDED. JSON array containing a list of the OAuth 2.0 [RFC6749] scope values that this server supports
+        response_types_supported:
+          type: string
+          description: REQUIRED. JSON array containing a list of the OAuth 2.0 response_type values that this OP supports
+        response_modes_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the OAuth 2.0 response_mode values that this OP supports
+        grant_types_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the OAuth 2.0 Grant Type values that this OP supports
+        acr_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the Authentication Context Class References that this OP supports
+        subject_types_supported:
+          type: string
+          description: REQUIRED. JSON array containing a list of the Subject Identifier types that this OP supports
+        id_token_signing_alg_values_supported:
+          type: string
+          description: REQUIRED. JSON array containing a list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT
+        id_token_encryption_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT
+        id_token_encryption_enc_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT
+        userinfo_signing_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) [JWA] supported by the UserInfo Endpoint to encode the Claims in a JWT
+        userinfo_encryption_alg_values_supported:
+          type: string
+          description: ROPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) [JWA] supported by the UserInfo Endpoint to encode the Claims in a JWT
+        userinfo_encryption_enc_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) [JWA] supported by the UserInfo Endpoint to encode the Claims in a JWT
+        request_object_signing_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) supported by the OP for Request Objects
+        request_object_encryption_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects
+        request_object_encryption_enc_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects
+        token_endpoint_auth_methods_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of Client Authentication methods supported by this Token Endpoint
+        token_endpoint_auth_signing_alg_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT
+        display_values_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the display parameter values that the OpenID Provider supports
+        claim_types_supported:
+          type: string
+          description: OPTIONAL. JSON array containing a list of the Claim Types that the OpenID Provider supports
+        claims_supported:
+          type: string
+          description: RECOMMENDED. JSON array containing a list of the Claim Names of the Claims that the OpenID Provider MAY be able to supply values for
+        service_documentation:
+          type: string
+          description: OPTIONAL. URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider
+        claims_locales_supported:
+          type: string
+          description: OPTIONAL. Languages and scripts supported for values in Claims being returned, represented as a JSON array of BCP47 [RFC5646] language tag values
+        ui_locales_supported:
+          type: string
+          description: OPTIONAL. Languages and scripts supported for the user interface, represented as a JSON array of BCP47 [RFC5646] language tag values
+        claims_parameter_supported:
+          type: boolean
+          description: OPTIONAL. Boolean value specifying whether the OP supports use of the claims parameter, with true indicating support. If omitted, the default value is false
+        request_parameter_supported:
+          type: boolean
+          description: OPTIONAL. Boolean value specifying whether the OP supports use of the request parameter, with true indicating support. If omitted, the default value is false
+        request_uri_parameter_supported:
+          type: boolean
+          description: OPTIONAL. Boolean value specifying whether the OP supports use of the request_uri parameter, with true indicating support. If omitted, the default value is true
+        require_request_uri_registration:
+          type: boolean
+          description: OPTIONAL. Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter
+        op_policy_uri:
+          type: string
+          description: OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP
+        op_tos_uri:
+          type: boolean
+          description: OPTIONAL. URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service
+      required:
+        - "issuer"
+        - "authorization_endpoint"
+        - "jwks_uri"
+        - "response_types_supported"
+        - "subject_types_supported"
+        - "id_token_signing_alg_values_supported"

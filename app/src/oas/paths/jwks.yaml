@@ -1,0 +1,85 @@
+openapi: '3.0.3'
+info:
+  description: The API of the i3Market OpenID Connect Provider. 
+  version: 0.9.0
+  title: i3-market OpenID Connect Provider API
+  contact:
+    name: Fernando Román García, Juan Hernández Serrano
+    email: fernando.roman@upc.edu
+
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+servers:
+  - url: http://localhost:3000/oidc
+    description: Local testing server
+
+tags:
+  - name: OIDC Core
+    description: |
+      The OpenID Connect Core 1.0 defines the core OpenID Connect functionality: authentication built on top of OAuth 2.0 and the use of Claims to communicate information about the End-User. It also describes the security and privacy considerations for using OpenID Connect.
+    externalDocs:
+      url: https://openid.net/specs/openid-connect-core-1_0.html
+  - name: OIDC Discovery
+    description: The OpenID Connect Discovery 1.0 specification defines a mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
+    externalDocs:
+      url: https://openid.net/specs/openid-connect-discovery-1_0.html
+
+paths:
+  /jwks:
+    get:
+      tags:
+        - OIDC Core
+      summary: Get JSON Web Key Set
+      description: JWKS endpoint containing the public keys used by OpenID Connect Relying Party to verify any JWT issued by the authorization server.
+      responses:
+        '200':
+          description: A JSON object that represents a set of JWKs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JWKSet'
+
+components:
+  schemas:
+    JWKSet:
+      title: JWKSet
+      type: object
+      properties:
+        keys:
+          type: array
+          description: The value of the "keys" parameter is an array of JWK values
+          items:
+            $ref: '#/components/schemas/JWK'
+    JWK:
+      title: JWK
+      type: object
+      properties:
+        kty:
+          type: string
+          description: The "kty" (key type) parameter identifies the cryptographic algorithm family used with the key, such as "RSA" or "EC"
+        use:
+          type: string
+          description: The "use" (public key use) parameter identifies the intended use of the public key
+        key_ops:
+          type: string
+          description: The "key_ops" (key operations) parameter identifies the operation(s) for which the key is intended to be used
+        alg:
+          type: string
+          description: The "alg" (algorithm) parameter identifies the algorithm intended for use with the key
+        kid:
+          type: string
+          description: The "kid" (key ID) parameter is used to match a specific key
+        x5u:
+          type: string
+          description: The "x5u" (X.509 URL) parameter is a URI [RFC3986] that refers to a resource for an X.509 public key certificate or certificate chain [RFC5280]
+        x5c:
+          type: string
+          description: The "x5c" (X.509 certificate chain) parameter contains a chain of one or more PKIX certificates [RFC5280]
+        x5t:
+          type: string
+          description: The "x5t" (X.509 certificate SHA-1 thumbprint) parameter is a base64url-encoded SHA-1 thumbprint (a.k.a. digest) of the DER encoding of an X.509 certificate [RFC5280]
+        x5t#S256:
+          type: string
+          description: The "x5t#S256" (X.509 certificate SHA-256 thumbprint) parameter is a base64url-encoded SHA-256 thumbprint (a.k.a. digest) of the DER encoding of an X.509 certificate [RFC5280]

@@ -1,0 +1,273 @@
+openapi: '3.0.3'
+info:
+  title: oidc authorization endpoint
+  version: 0.9.0
+servers:
+  - url: http://localhost:3000/oidc
+    description: 'Development server' 
+paths:
+  /auth:
+    get:
+      summary: request authorization code
+      operationId: authorizationCode
+      tags: 
+        - OIDC Core
+      parameters:
+        - $ref: '#/components/parameters/auth_req_scope'
+        - $ref: '#/components/parameters/auth_req_response_type'
+        - $ref: '#/components/parameters/auth_req_client_id'
+        - $ref: '#/components/parameters/auth_req_redirect_uri'
+        - $ref: '#/components/parameters/auth_req_state'
+        - $ref: '#/components/parameters/auth_req_code_challenge'
+        - $ref: '#/components/parameters/auth_req_code_challenge_method'
+        - $ref: '#/components/parameters/auth_req_response_mode'
+        - $ref: '#/components/parameters/auth_req_nonce'
+        - $ref: '#/components/parameters/auth_req_display'
+        - $ref: '#/components/parameters/auth_req_prompt'
+        - $ref: '#/components/parameters/auth_req_max_age'
+        - $ref: '#/components/parameters/auth_req_ui_locales'
+        - $ref: '#/components/parameters/auth_req_id_token_hint'
+        - $ref: '#/components/parameters/auth_req_login_hint'
+        - $ref: '#/components/parameters/auth_req_acr_values'
+      responses:
+        "302":
+          description: Redirect the user to perform the authentication or redirect to callback_uri with code or error
+          headers:
+            Location:
+              description: either an AuthenticationRedirect or an AuthorizationResponseRedirect or an AuthorizationErrorRedirect (look at the schemas for more details)
+              schema:
+                type: string
+                format: uri
+              example: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
+
+components:
+  parameters:
+    auth_req_scope:
+      name: scope
+      in: query
+      description: |
+        REQUIRED. A space-separated list of identity claims to request from the end-user.
+        
+        OpenID Connect requests MUST contain the `openid` scope value.
+        
+        If the openid scope value is not present, the behavior is entirely unspecified.
+        
+        Other scope values MAY be present. Scope values used that are not understood by an implementation SHOULD be ignored.
+      required: true
+      schema:
+        type: string
+      example: openid
+    auth_req_response_type:
+      name: response_type
+      in: query
+      description: REQUIRED. OAuth 2.0 Response Type value that determines the authorization processing flow to be used, including what parameters are returned from the endpoints used. When using the Authorization Code Flow, this value is code.
+      required: true
+      schema:
+        type: string
+        enum:
+        - code
+    auth_req_client_id:
+      name: client_id
+      in: query
+      description: OAuth 2.0 Client Identifier valid at the Authorization Server.
+      required: true
+      schema:
+        type: string
+      example: client_id1
+    auth_req_redirect_uri:
+      name: redirect_uri
+      in: query
+      description: REQUIRED. Redirection URI to which the response will be sent. This URI MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison). When using this flow, the Redirection URI SHOULD use the https scheme; however, it MAY use the http scheme, provided that the Client Type is confidential, as defined in Section 2.1 of OAuth 2.0, and provided the OP allows the use of http Redirection URIs in this case. The Redirection URI MAY use an alternate scheme, such as one that is intended to identify a callback into a native application
+      required: true
+      schema:
+        type: string
+        format: uri
+        example: https://mywebapp.com/auth/callback
+    auth_req_state:
+      name: state
+      in: query
+      description: RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, Cross-Site Request Forgery (CSRF, XSRF) mitigation is done by cryptographically binding the value of this parameter with a browser cookie.
+      required: false
+      schema:
+        type: string
+    auth_req_code_challenge:
+      name: code_challenge
+      in: query
+      description: |
+        A code challenge derived from the code verifier by using one of the following transformations described in the code_challenge_method.
+
+        REQUIRED if using ACG with PKCE extension
+
+        It is RECOMMENDED that the output of a suitable random number generator be used to create a 32-octet sequence. The octet sequence is then base64url-encoded to produce a 43-octet URL safe string to use as the code verifier.
+
+        Example code (node.js):
+        ```javascript
+        const base64url = require("base64url")
+        const crypto = require('crypto')
+        const codeVerifierBuf = crypto.randomBytes(32)
+        const codeVerifier = base64url.encode(codeVerifierBuf)
+        console.log(codeVerifier)
+        const hash = crypto.createHash('sha256')
+                    .update(codeVerifier)
+                    .digest();
+        const codeChallenge = base64url.encode(hash)
+        console.log(codeChallenge)
+        ```
+      required: false
+      schema:
+        maxLength: 128
+        minLength: 43
+        pattern: ^[A-Za-z0-9\-._~]{43,128}$
+        type: string
+      example: FL_DFs6V30KSJAIq7h_LsAttGYAplaYGdFUkGeN54EE
+    auth_req_code_challenge_method:
+      name: code_challenge_method
+      in: query
+      description: |
+        REQUIRED if using ACG+PKCE
+        - 'plain' code_challenge = code_verifier
+        - 'S256' code_challenge = BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+      required: false
+      schema:
+        type: string
+        default: plain
+        enum:
+        - S256
+        - plain
+    auth_req_response_mode:
+      name: response_mode
+      in: query
+      description: OPTIONAL. Informs the Authorization Server of the mechanism to be used for returning parameters from the Authorization Endpoint. This use of this parameter is NOT RECOMMENDED when the Response Mode that would be requested is the default mode specified for the Response Type.
+      required: false
+      schema:
+        type: string
+    auth_req_nonce:
+      name: nonce
+      in: query
+      description: OPTIONAL. String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token. Sufficient entropy MUST be present in the `nonce` values used to prevent attackers from guessing values. For implementation notes, see Section 15.5.2.
+      required: false
+      schema:
+        type: string
+    auth_req_display:
+      name: display
+      in: query
+      description: |
+        OPTIONAL. ASCII string value that specifies how the Authorization Server displays the authentication and consent user interface pages to the End-User. The defined values are:
+        - `page` The Authorization Server SHOULD display the authentication and consent UI consistent with a full User Agent page view. If the display parameter is not specified, this is the default display mode.
+        - `popup` The Authorization Server SHOULD display the authentication and consent UI consistent with a popup User Agent window. The popup User Agent window should be of an appropriate size for a login-focused dialog and should not obscure the entire window that it is popping up over.
+        - `touch` The Authorization Server SHOULD display the authentication and consent UI consistent with a device that leverages a touch interface.
+        - `wap` The Authorization Server SHOULD display the authentication and consent UI consistent with a "feature phone" type display.
+
+        The Authorization Server MAY also attempt to detect the capabilities of the User Agent and present an appropriate display.
+      required: false
+      schema:
+        type: string
+        default: page
+        enum:
+        - page
+        - popup
+        - touch
+        - wap
+    auth_req_prompt:
+      name: prompt
+      in: query
+      description: |
+        OPTIONAL. Space delimited, case sensitive list of ASCII string values that specifies whether the Authorization Server prompts the End-User for reauthentication and consent. The defined values are:
+        - `none` The Authorization Server MUST NOT display any authentication or consent user interface pages. An error is returned if an End-User is not already authenticated or the Client does not have pre-configured consent for the requested Claims or does not fulfill other conditions for processing the request. The error code will typically be `login_required`, `interaction_required`, or another code defined in Section 3.1.2.6. This can be used as a method to check for existing authentication and/or consent.
+        - `login` The Authorization Server SHOULD prompt the End-User for reauthentication. If it cannot reauthenticate the End-User, it MUST return an error, typically `login_required`.
+        - `consent` The Authorization Server SHOULD prompt the End-User for consent before returning information to the Client. If it cannot obtain consent, it MUST return an error, typically `consent_required`.
+        - `select_account` The Authorization Server SHOULD prompt the End-User to select a user account. This enables an End-User who has multiple accounts at the Authorization Server to select amongst the multiple accounts that they might have current sessions for. If it cannot obtain an account selection choice made by the End-User, it MUST return an error, typically `account_selection_required`.
+
+        The `prompt` parameter can be used by the Client to make sure that the End-User is still present for the current session or to bring attention to the request. If this parameter contains `none` with any other value, an error is returned.
+      required: false
+      schema:
+        type: string
+        enum:
+        - none
+        - login
+        - consent
+        - select_account
+    auth_req_max_age:
+      name: max_age
+      in: query
+      description: OPTIONAL. Maximum Authentication Age. Specifies the allowable elapsed time in seconds since the last time the End-User was actively authenticated by the OP. If the elapsed time is greater than this value, the OP MUST attempt to actively re-authenticate the End-User. (The `max_age` request parameter corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] `max_auth_age` request parameter.) When `max_age` is used, the ID Token returned MUST include an `auth_time` Claim Value.
+      required: false
+      schema:
+        type: number
+    auth_req_ui_locales:
+      name: ui_locales
+      in: query
+      description: OPTIONAL. End-User's preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference. For instance, the value "fr-CA fr en" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation). An error SHOULD NOT result if some or all of the requested locales are not supported by the OpenID Provider.
+      required: false
+      schema:
+        type: string
+    auth_req_id_token_hint:
+      name: id_token_hint
+      in: query
+      description: |
+        OPTIONAL. ID Token previously issued by the Authorization Server being passed as a hint about the End-User's current or past authenticated session with the Client. If the End-User identified by the ID Token is logged in or is logged in by the request, then the Authorization Server returns a positive response; otherwise, it SHOULD return an error, such as `login_required`. When possible, an `id_token_hint` SHOULD be present when `prompt=none` is used and an `invalid_request` error MAY be returned if it is not; however, the server SHOULD respond successfully when possible, even if it is not present. The Authorization Server need not be listed as an audience of the ID Token when it is used as an `id_token_hint` value.
+
+        If the ID Token received by the RP from the OP is encrypted, to use it as an `id_token_hint`, the Client MUST decrypt the signed ID Token contained within the encrypted ID Token. The Client MAY re-encrypt the signed ID token to the Authentication Server using a key that enables the server to decrypt the ID Token, and use the re-encrypted ID token as the `id_token_hint` value.
+      required: false
+      schema:
+        pattern: ^(([A-Za-z0-9\-_])+\.)([A-Za-z0-9\-_]+)(\.([A-Za-z0-9\-_]+))?$
+        type: string
+    auth_req_login_hint:
+      name: login_hint
+      in: query
+      description: OPTIONAL. Hint to the Authorization Server about the login identifier the End-User might use to log in (if necessary). This hint can be used by an RP if it first asks the End-User for their e-mail address (or other identifier) and then wants to pass that value as a hint to the discovered authorization service. It is RECOMMENDED that the hint value match the value used for discovery. This value MAY also be a phone number in the format specified for the `phone_number` Claim. The use of this parameter is left to the OP's discretion.
+      required: false
+      schema:
+        type: string
+    auth_req_acr_values:
+      name: acr_values
+      in: query
+      description: OPTIONAL. Requested Authentication Context Class Reference values. Space-separated string that specifies the `acr` values that the Authorization Server is being requested to use for processing this Authentication Request, with the values appearing in order of preference. The Authentication Context Class satisfied by the authentication performed is returned as the `acr` Claim Value, as specified in Section 2. The `acr` Claim is requested as a Voluntary Claim by this parameter.
+      required: false
+      schema:
+        type: string   
+
+  schemas:
+    AuthorizationResponseRedirect:
+      title: AuthorizationResponseRedirect
+      type: string
+      description: |
+        If the resource owner grants the access request, the authorization server issues an authorization code and delivers it to the client by adding the following parameters to the query component of the redirection URI using the "application/x-www-form-urlencoded" format:
+        - `code` REQUIRED. The authorization code generated by the authorization server.  The authorization code MUST expire shortly after it is issued to mitigate the risk of leaks. A maximum authorization code lifetime of 10 minutes is RECOMMENDED. The client MUST NOT use the authorization code.
+        - `state` REQUIRED if the `state` parameter was present in the client authorization request.  The exact value received from the client.
+      format: uri
+      example: |
+        HTTP/1.1 302 Found
+        Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
+
+    AuthorizationErrorRedirect:
+      title: AuthorizationErrorRedirect
+      type: string
+      description: |
+        If the request fails due to a missing, invalid, or mismatching redirection URI, or if the client identifier is missing or invalid, the authorization server SHOULD inform the resource owner of the error and MUST NOT automatically redirect the user-agent to the invalid redirection URI.
+        If the resource owner denies the access request or if the request fails for reasons other than a missing or invalid redirection URI, the authorization server informs the client by adding the following parameters to the query component of the redirection URI using the "application/x-www-form-urlencoded" format, per Appendix B:
+        - `error` REQUIRED. A single ASCII [USASCII] error code from the following:
+          - `invalid_request` The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, or is otherwise malformed. This code will be generated e.g. if the he client has not sent the `code_challenge`.
+          - `unauthorized_client` The client is not authorized to request an authorization code using this method.
+          - `access_denied` The resource owner or authorization server denied the request.
+          - `unsupported_response_type` The authorization server does not support obtaining an authorization code using this method.
+          - `invalid_scope` The requested scope is invalid, unknown, or malformed.
+          - `server_error` The authorization server encountered an unexpected condition that prevented it from fulfilling the request. (This error code is needed because a 500 Internal Server Error HTTP status code cannot be returned to the client via an HTTP redirect.)
+          - `temporarily_unavailable` The authorization server is currently unable to handle the request due to a temporary overloading or maintenance of the server.  (This error code is needed because a 503 Service Unavailable HTTP status code cannot be returned to the client via an HTTP redirect.)
+          - `interaction_required` The Authorization Server requires End-User interaction of some form to proceed. This error MAY be returned when the `prompt` parameter value in the Authentication Request is `none`, but the Authentication Request cannot be completed without displaying a user interface for End-User interaction.
+          - `login_required` The Authorization Server requires End-User authentication. This error MAY be returned when the `prompt` parameter value in the Authentication Request is `none`, but the Authentication Request cannot be completed without displaying a user interface for End-User authentication.
+          - `account_selection_required` The End-User is REQUIRED to select a session at the Authorization Server. The End-User MAY be authenticated at the Authorization Server with different associated accounts, but the End-User did not select a session. This error MAY be returned when the `prompt` parameter value in the Authentication Request is `none`, but the Authentication Request cannot be completed without displaying a user interface to prompt for a session to use.
+          - `consent_required` The Authorization Server requires End-User consent. This error MAY be returned when the `prompt` parameter value in the Authentication Request is `none`, but the Authentication Request cannot be completed without displaying a user interface for End-User consent.
+          - `invalid_request_uri` The `request_uri` in the Authorization Request returns an error or contains invalid data.
+          - `invalid_request_object` The `request` parameter contains an invalid Request Object.
+          - `request_not_supported` The OP does not support use of the `request` parameter defined in Section 6.
+          - `request_uri_not_supported` The OP does not support use of the `request_uri` parameter defined in Section 6.
+          - `registration_not_supported` The OP does not support use of the `registration` parameter defined in Section 7.2.1.
+        - `error_description` OPTIONAL. Human-readable ASCII [USASCII] text providing additional information, used to assist the client developer in understanding the error that occurred.
+        - `error_uri` OPTIONAL. A URI identifying a human-readable web page with information about the error, used to provide the client developer with additional information about the error.
+        - `state` OAuth 2.0 state value. REQUIRED if the Authorization Request included the `state` parameter. Set to the value received from the Client.
+      format: uri
+      example: |
+        HTTP/1.1 302 Found
+
+        Location: https://client.example.org/cb?error=invalid_request&error_description=Unsupported%20response_type%20value&state=af0ifjsldkj

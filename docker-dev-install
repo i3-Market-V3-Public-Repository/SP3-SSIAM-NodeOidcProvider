@@ -1,0 +1,2 @@
+#!/bin/sh
+docker-compose -f docker-compose.dev.yaml run --rm --no-deps oidc-provider-app npm install
