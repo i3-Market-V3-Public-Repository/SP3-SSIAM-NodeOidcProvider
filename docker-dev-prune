@@ -1,2 +1,3 @@
 #!/bin/sh
+docker-compose -f docker-compose.dev.yaml run --rm --no-deps oidc-provider-app npm run clean
 docker-compose -f docker-compose.dev.yaml down --rmi all --remove-orphans --volumes

@@ -13,7 +13,8 @@
     "lint": "ts-standard",
     "identity": "ts-node scripts/new-identity.ts",
     "prestart": "npm run build",
-    "oas": "swagger-cli bundle --outfile ./src/oas/api.json ./src/oas/api.yaml"
+    "oas": "swagger-cli bundle --outfile ./src/oas/api.json ./src/oas/api.yaml",
+    "clean": "ts-node scripts/clean.ts"
   },
   "keywords": [],
   "author": "",

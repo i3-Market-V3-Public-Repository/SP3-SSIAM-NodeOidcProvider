@@ -1,2 +1,2 @@
 #!/bin/sh
-docker-compose -f docker-compose.dev.yaml up
+docker-compose -f docker-compose.dev.yaml run --rm oidc-provider-app ./scripts/start.sh
