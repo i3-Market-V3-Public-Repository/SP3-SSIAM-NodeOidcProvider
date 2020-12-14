@@ -7,8 +7,8 @@ services:
     working_dir: /data/scripts
     volumes:
       - "$PWD/volumes/mongo:/data/db"
-      - "$PWD/scripts/db:/data/scripts"
-    env_file: $PWD/misc/dev.env
+      - "$PWD/db/scripts:/data/scripts"
+    env_file: $PWD/app/misc/dev.env
     ports:
         - 27017:27017
 
@@ -17,9 +17,9 @@ services:
     container_name: oidc-db-initializer
     working_dir: /data/scripts
     volumes:
-      - "$PWD/scripts/db:/data/scripts"
-      - "$PWD/misc/initial-state.js:/data/scripts/initial-state.js"
-    env_file: $PWD/misc/dev.env
+      - "$PWD/db/scripts:/data/scripts"
+      - "$PWD/app/misc/initial-state.js:/data/scripts/initial-state.js"
+    env_file: $PWD/app/misc/dev.env
     environment:
       - WAIT_HOSTS=db:27017
       - WAIT_HOSTS_TIMEOUT=300
@@ -36,7 +36,7 @@ services:
   #     - /etc/hosts:/tmp/hosts
 
   oidc-provider:
-    image: node:lts
+    image: node:14
     container_name: oidc-provider
     ports:
       - 3000:3000
@@ -48,10 +48,10 @@ services:
     environment:
       - OIDC_PROVIDER_REVERSE_PROXY=true
     volumes:
-      - "$PWD:/usr/src/app/"
+      - "$PWD/app:/usr/src/app"
       - "$PWD/volumes/node_modules:/usr/src/app/node_modules"
       - "$PWD/volumes/ssh:/root/.ssh"
-    command: "./scripts/start.sh"
+    command: "./app/scripts/start.sh"
 
   oidc-rp:
     image: oidc-rp
@@ -59,7 +59,7 @@ services:
       - oidc-provider
     ports:
       - 3001:7080
-    env_file: $PWD/misc/dev.env
+    env_file: $PWD/app/misc/dev.env
 
   keycloak:
     image: quay.io/keycloak/keycloak:11.0.2
