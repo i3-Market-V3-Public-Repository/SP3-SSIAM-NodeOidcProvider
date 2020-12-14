@@ -1,6 +1,4 @@
-FROM node:lts
-
-# Configure default values
+FROM node:14
 
 ## Mongo default configuration
 ENV MONGO_HOST localhost
@@ -8,17 +6,10 @@ ENV MONGO_INITDB_ROOT_USERNAME oidp
 ENV MONGO_INITDB_ROOT_PASSWORD secret
 ENV MONGO_INITDB_DATABASE oidp
 
-# Create app directory
-WORKDIR /usr/src/app
-
-# Install
-COPY ./build /usr/src/app
-COPY ./package.json /usr/src/app
-COPY ./package-lock.json /usr/src/app
-
+WORKDIR /app
+COPY ./app/build /app/
 RUN npm i --only=prod
 
-# Configure entrypoint
-CMD node ./src
-
 EXPOSE 3000
+
+CMD ["node", "src/index.js"]

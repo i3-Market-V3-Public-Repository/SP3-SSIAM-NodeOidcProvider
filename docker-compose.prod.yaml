@@ -35,11 +35,22 @@ services:
       - /etc/hosts:/tmp/hosts
 
   oidc-provider-dev:
-    image: node:lts
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+      args: 
+        UID: 1000
+        GID: 1000
+    image: i3market/oidc-provider-dev
     container_name: oidc-provider-dev
     hostname: oidc-provider
     environment:
-      - OIDC_PROVIDER_PORT=80
+      OIDC_PROVIDER_DB_HOST: oidc-provider-db
+      OIDC_PROVIDER_DB_PORT: 27017
+      OIDC_PROVIDER_DB_USERNAME: oidp
+      OIDC_PROVIDER_DB_PASSWORD: QGZ4w625UMufe2QT
+      OIDC_PROVIDER_DB_DATABASE: oidp
+      OIDC_PROVIDER_REVERSE_PROXY: 0
     ports:
       - 3000:80
     external_links:
@@ -47,19 +58,21 @@ services:
     links:
       - db
       - db-initialize
-    working_dir: /usr/src/app
     volumes:
-      - "$PWD:/usr/src/app/"
-    command: "npm run run:dev"
+      - "$PWD/app:/app"
+    command:
+      - npm
+      - run
+      - start
 
   oidc-provider:
     build: .
     container_name: oidc-provider
-    env_file: $PWD/misc/env
+    env_file: $PWD/app/misc/env
     environment:
       - OIDC_PROVIDER_PORT=80
     volumes:
-      - "$PWD/misc:/usr/src/app/misc"
+      - "$PWD/app/misc:/app/misc"
     ports:
       - 3000:80
     external_links:
@@ -74,7 +87,7 @@ services:
       - oidc-provider-dev:oidc-provider
     ports:
       - 7080:7080
-    env_file: $PWD/misc/env
+    env_file: $PWD/app/misc/env
 
   keycloak:
     image: quay.io/keycloak/keycloak:11.0.2
