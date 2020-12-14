@@ -21,7 +21,7 @@ services:
       OIDC_PROVIDER_DB_USERNAME: oidp
       OIDC_PROVIDER_DB_PASSWORD: QGZ4w625UMufe2QT
       OIDC_PROVIDER_DB_DATABASE: oidp
-      OIDC_PROVIDER_REVERSE_PROXY: 0
+      OIDC_PROVIDER_REVERSE_PROXY: 1
     command:
       - ./scripts/start.sh
     networks:

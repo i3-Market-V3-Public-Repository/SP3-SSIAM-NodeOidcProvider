@@ -17,7 +17,7 @@ class Config {
 
       OIDC_PROVIDER_ISSUER: 'https://localhost:3000',
       OIDC_PROVIDER_PORT: '3000',
-      OIDC_PROVIDER_REVER_PROXY: 'false',
+      OIDC_PROVIDER_REVER_PROXY: '0',
 
       OIDC_PROVIDER_DB_HOST: 'localhost',
       OIDC_PROVIDER_DB_PORT: '27017',
@@ -29,7 +29,7 @@ class Config {
   }
 
   // Conversion functions
-  protected fromBoolean: ConvertFunction<boolean> = (v) => v.toLocaleLowerCase() === 'true'
+  protected fromBoolean: ConvertFunction<boolean> = (v) => v.toLocaleLowerCase() === '1'
   protected fromArray: ConvertFunction<string[]> = (v) => v.split(',')
   protected fromInteger: ConvertFunction<number> = parseInt
 
