@@ -4,9 +4,19 @@ An OpenID Provider for i3-Market.
 
 ## Development
 
-A just-working version using a mongodb initialized with the content in `db/scripts/mongo-init.js`.
+A just-working version using a mongodb initialized with the content in `db/scripts/mongo-init.js`. Update to your needs!
 
-Just run. The first time it will take a while (be patience), since it has to build images and download all the npn dependencies.
+### Install
+Clone the repository with
+
+```console 
+$ git clone git@gitlab.com:i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider.git
+$ cd node-oidc-provider
+```
+
+### Usage
+
+Run the following command in the project root. The first time it will take a while (be patience), since it has to build images and download all the npn dependencies.
 
 ```console
 ./docker-dev-start
@@ -22,9 +32,9 @@ If you want to delete and prune all the created images, containers, networks, vo
 ./docker-dev-prune
 ```
 
-Since the `app` directory is shared with the docker container with mapped user permissions, you can just edit any files in the `app` directory locally. The container will be running `ts-node` and `nodemon` to directly execute the source code and refresh the server if any file has changed. You can also attach any debugger since at default port 9229.
+Since the `app` directory is shared with the docker container with mapped user permissions, you can just edit any files in the `app` directory locally. The container will be running `ts-node` and `nodemon` to directly execute the source code and refresh the server if any file has changed. You can also attach any debugger in your local machine to the container, which will be listening at default port 9229.
 
-### Development scripts
+#### Development scripts
 
 Besides rebuilding, you can execute any command in the `cloud-wallet-server` container:
 
