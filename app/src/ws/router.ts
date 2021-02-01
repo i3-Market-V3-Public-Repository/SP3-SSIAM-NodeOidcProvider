@@ -36,6 +36,7 @@ export function WebSocketRouter<P> (): Router {
 
   router.use = methodHandler(Methods.all)
   router.connect = methodHandler(Methods.connect)
+  router.keepAlive = methodHandler(Methods.keepAlive)
   router.message = methodHandler(Methods.message)
   router.close = methodHandler(Methods.close)
 
@@ -47,7 +48,7 @@ export function WebSocketRouter<P> (): Router {
     return (...args) => {
       const { handler, path } = getRouteArguments(args)
       data.children.push({
-        path: path || '',
+        path: path === undefined ? '' : path,
         method,
         handler
       })

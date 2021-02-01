@@ -120,3 +120,13 @@ cd misc
 cp template.dev dev.env
 cp initial-state.template.js initial-state.js
 ```
+
+## TODO
+
+Add to the Readme:
+
+1. instalacion en servidor
+2. como conectar con un rp estandar
+3. como se define el scope (como funcionan las vc claims)
+4. formatos de access_token y id_token
+5. registro de clientes para el servidor de demo?

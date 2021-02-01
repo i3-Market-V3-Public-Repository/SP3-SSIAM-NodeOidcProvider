@@ -41,7 +41,11 @@ export class WebSocketServer implements IRouter<WebSocketServer> {
 
       wsoc.on('message', (data) => {
         req.data = data
-        this.handle(socket, req, Methods.message)
+        if (data === '@keepalive@') {
+          this.handle(socket, req, Methods.keepAlive)
+        } else {
+          this.handle(socket, req, Methods.message)
+        }
       })
 
       //
@@ -67,8 +71,12 @@ export class WebSocketServer implements IRouter<WebSocketServer> {
     })
   }
 
-  handle (socket: Socket, req: Request, method: Methods) {
-    logger.info(`${method} ${req.url}`)
+  handle (socket: Socket, req: Request, method: Methods): void {
+    if (method === Methods.keepAlive) {
+      logger.debug(`${method} ${req.url}`)
+    } else {
+      logger.info(`${method} ${req.url}`)
+    }
 
     this.initRequest(req, method)
     this.rootRouter(socket, req, nextFunction)
@@ -92,7 +100,7 @@ export class WebSocketServer implements IRouter<WebSocketServer> {
     })
   }
 
-  initRequest (req: Request, method: Methods) {
+  initRequest (req: Request, method: Methods): void {
     req.routerPath = ''
     req.socketMethod = method
     req.params = {}
@@ -107,6 +115,7 @@ export class WebSocketServer implements IRouter<WebSocketServer> {
 
   use: RouteHandler<this> = this.route('use')
   connect: RouteHandler<this> = this.route('connect')
+  keepAlive: RouteHandler<this> = this.route('keepAlive')
   message: RouteHandler<this> = this.route('message')
   close: RouteHandler<this> = this.route('close')
 }

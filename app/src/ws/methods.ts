@@ -3,4 +3,5 @@ export enum Methods {
   connect = 'CONNECT',
   close = 'CLOSE',
   message = 'MESSAGE',
+  keepAlive = 'KEEPALIVE'
 }
