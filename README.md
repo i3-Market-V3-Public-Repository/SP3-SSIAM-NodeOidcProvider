@@ -2,11 +2,21 @@
 
 An OpenID Provider for i3-Market.
 
+## Install
+Clone the repository with
+
+```console 
+$ git clone git@gitlab.com:i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider.git
+$ cd node-oidc-provider
+```
+
 ## Development
 
-A just-working version using a mongodb initialized with the content in `db/scripts/mongo-init.js`.
+A just-working version using a mongodb initialized with the content in `db/scripts/mongo-init.js`. Update to your needs!
 
-Just run. The first time it will take a while (be patience), since it has to build images and download all the npn dependencies.
+### Usage
+
+Run the following command in the project root. The first time it will take a while (be patience), since it has to build images and download all the npn dependencies.
 
 ```console
 ./docker-dev-start
@@ -22,22 +32,22 @@ If you want to delete and prune all the created images, containers, networks, vo
 ./docker-dev-prune
 ```
 
-Since the `app` directory is shared with the docker container with mapped user permissions, you can just edit any files in the `app` directory locally. The container will be running `ts-node` and `nodemon` to directly execute the source code and refresh the server if any file has changed. You can also attach any debugger since at default port 9229.
+Since the `app` directory is shared with the docker container with mapped user permissions, you can just edit any files in the `app` directory locally. The container will be running `ts-node` and `nodemon` to directly execute the source code and refresh the server if any file has changed. You can also attach any debugger in your local machine to the container, which will be listening at default port 9229.
 
-### Development scripts
+#### Development scripts
 
-Besides rebuilding, you can execute any command in the `cloud-wallet-server` container:
+Besides rebuilding, you can execute any command in the `oidc-provider-app` container:
 
 - to execute it in the running container:
 
     ```console
-    docker-compose exec cloud-wallet-server <command>
+    docker-compose -f docker-compose.dev.yaml exec oidc-provider-app <command>
     ```
 
 - to create and delete on-the-fly a new container (that will update the same files):
 
     ```console
-    docker-compose run --rm --no-deps cloud-wallet-server <command>
+    docker-compose -f docker-compose.dev.yaml run --rm --no-deps oidc-provider-app <command>
     ```
 
 Since `npm` and `node` are likely to be needed, if your OS allows you to execute shell scripts, you can just also use the `npm` and `node` scripts provided for convenience.
