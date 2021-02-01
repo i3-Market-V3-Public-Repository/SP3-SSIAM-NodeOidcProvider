@@ -8,8 +8,8 @@ import logger from '@i3-market/logger'
 import configuration from './configuration'
 
 let provider: Provider | undefined
-export default async () => {
-  if (provider) return provider
+export default async (): Promise<Provider> => {
+  if (provider !== undefined) return provider
   const baseOIDCConfig = await configuration()
 
   if (config.isProd) {

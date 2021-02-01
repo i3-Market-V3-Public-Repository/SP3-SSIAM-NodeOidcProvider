@@ -2,6 +2,7 @@ import * as path from 'path'
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import * as http from 'http'
+import * as ngrok from 'ngrok'
 
 import config from './config'
 import logger, { loggerMiddleware } from './logger'
@@ -42,11 +43,12 @@ export async function main (): Promise<void> {
   app.use(loggerMiddleware)
 
   /**
-     * TODO:
-     * Force proto https if reverse proxy. Header x-forwarded-proto must be setted by the proxy
-     * Only use this option on development enviromnent!
-     */
+   * TODO:
+   * Force proto https if reverse proxy. Header x-forwarded-proto must be setted by the proxy
+   * Only use this option on development enviromnent!
+   */
   if (config.revereProxy && !config.isProd) {
+    logger.warn('Setting up x-forwarded-proto header as https. Note that it should be only used in development!')
     app.use((req, res, next) => {
       req.headers['x-forwarded-proto'] = 'https'
       next()
@@ -63,12 +65,17 @@ export async function main (): Promise<void> {
 
   // Listen
   const port = config.port
-  const url = `http://localhost:${port}`
   await listenPromise(server, port)
+
+  // Connect to ngrok
+  let url = `http://localhost:${port}`
+  if (config.useNgrok) {
+    url = await ngrok.connect({ addr: port })
+  }
 
   // Log connection information
   logger.info(`Application is listening on port ${config.port}`)
-  logger.info(`Check its /.well-known/openid-configuration at ${url}/oidc/.well-known/openid-configuration`)
+  logger.info(`OIDC Provider Discovery endpoint at ${url}/oidc/.well-known/openid-configuration`)
   logger.info(`OpenAPI JSON spec at ${url}/oidc/api-spec/openapi.json`)
   logger.info(`OpenAPI browsable spec at ${url}/oidc/api-spec/ui`)
 }

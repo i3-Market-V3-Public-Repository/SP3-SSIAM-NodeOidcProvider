@@ -7,7 +7,7 @@ import { getProvider } from '../oidc'
 import InteractionController from './controller'
 
 //
-function nextIfError (handler: RequestHandler): RequestHandler {
+function nextIfError<A, B, C, D> (handler: RequestHandler<A, B, C, D>): RequestHandler<A, B, C, D> {
   return async (req, res, next) => {
     await (handler(req, res, next) as any).catch(next)
   }
@@ -35,7 +35,7 @@ const endpoint: EndpointLoader = async (app, wss) => {
     // you'll probably want to use a full blown render engine capable of layouts
     res.render = (view, locals) => {
       app.render(view, locals, (err, html) => {
-        if (err) throw err
+        if (err !== null) throw err
         orig.call(res, '_layout', {
           ...locals,
           body: html
@@ -47,15 +47,12 @@ const endpoint: EndpointLoader = async (app, wss) => {
 
   // Setup app routes
   appRouter.get('/:uid', setNoCache, nextIfError(controller.handleInteraction))
-  appRouter.post('/:uid/login', setNoCache, body, nextIfError(controller.login))
-  appRouter.post('/:uid/continue', setNoCache, body, nextIfError(controller.continue))
-  appRouter.post('/:uid/confirm', setNoCache, body, nextIfError(controller.confirm))
+  appRouter.post('/:uid/login', setNoCache, body, nextIfError(controller.loginAndConsent))
   appRouter.get('/:uid/abort', setNoCache, nextIfError(controller.abort))
   appRouter.post('/:uid/callback', setNoCache, body, nextIfError(controller.callback))
 
   // Setup ws routes
   wsRouter.connect('/:uid/socket', controller.socketConnect)
-  wsRouter.message('/:uid/socket', controller.socketMessage)
   wsRouter.close('/:uid/socket', controller.socketClose)
 
   // Handle errors
