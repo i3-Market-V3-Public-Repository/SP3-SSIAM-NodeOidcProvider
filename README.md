@@ -217,6 +217,6 @@ eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InIxTGtiQm8zOTI1UmIyWkZGckt5VTNNVmV4
 
 Add to the Readme:
 
-1. instalacion en servidor
-2. como conectar con un rp estandar
-3. registro de clientes para el servidor de demo?
+1. How to install OIDC Provider on a server
+2. How to connect using an standard OIDC library
+3. How to register clients for the demo
