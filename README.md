@@ -218,5 +218,5 @@ eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InIxTGtiQm8zOTI1UmIyWkZGckt5VTNNVmV4
 Add to the Readme:
 
 1. How to install OIDC Provider on a server
-2. How to connect using an standard OIDC library
+2. How to connect using a standard OIDC library
 3. How to register clients for the demo
