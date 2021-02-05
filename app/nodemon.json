@@ -1,0 +1,16 @@
+{
+    "ignore": [
+        "./src/routes/api-spec/api.json"
+    ],
+    "verbose": true,
+    "events": {
+        "restart": "npm run oas"
+    },
+    "watch": [
+      "src/**/*"
+    ],
+    "env": {
+      "NODE_ENV": "development"
+    },
+    "ext": "json,ts,yaml"
+}

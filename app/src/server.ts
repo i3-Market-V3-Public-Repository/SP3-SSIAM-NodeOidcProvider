@@ -10,7 +10,7 @@ import Adapter from './adapter'
 import { addEndpoint } from './endpoint'
 import WebSocketServer from './ws'
 
-import { oidcEndpoint, interactionEndpoint } from './routes'
+import { oidcEndpoint, interactionEndpoint, rpEndpoint, apiSpecEndpoint } from './routes'
 
 /// ///////
 
@@ -56,8 +56,10 @@ export async function main (): Promise<void> {
   }
 
   // Add endpoints
+  addEndpoint(app, wss, '/api-spec', await apiSpecEndpoint(app, wss))
   addEndpoint(app, wss, '/oidc', await oidcEndpoint(app, wss))
   addEndpoint(app, wss, '/interaction', await interactionEndpoint(app, wss))
+  addEndpoint(app, wss, '/rp', await rpEndpoint(app, wss))
 
   // Add static files (css and js)
   const publicDir = path.resolve(__dirname, 'public')
@@ -76,8 +78,8 @@ export async function main (): Promise<void> {
   // Log connection information
   logger.info(`Application is listening on port ${config.port}`)
   logger.info(`OIDC Provider Discovery endpoint at ${url}/oidc/.well-known/openid-configuration`)
-  logger.info(`OpenAPI JSON spec at ${url}/oidc/api-spec/openapi.json`)
-  logger.info(`OpenAPI browsable spec at ${url}/oidc/api-spec/ui`)
+  logger.info(`OpenAPI JSON spec at ${url}/api-spec/openapi.json`)
+  logger.info(`OpenAPI browsable spec at ${url}/api-spec/ui`)
 }
 
 export function onError (reason: Error): void {
