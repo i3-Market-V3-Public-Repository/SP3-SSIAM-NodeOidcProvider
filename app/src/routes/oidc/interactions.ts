@@ -1,10 +1,19 @@
 import { interactionPolicy, Configuration } from 'oidc-provider'
 
-const interactions: Configuration['interactions'] = {
-  policy: interactionPolicy.base(),
-  url: (ctx, interaction) => {
-    return `/interaction/${ctx.oidc.uid}`
+export default (): Configuration['interactions'] => {
+  const basePolicy = interactionPolicy.base()
+  const loginAndConsent = new interactionPolicy.Prompt({ name: 'loginAndConsent' })
+
+  for (const prompt of basePolicy) {
+    for (const check of prompt.checks) {
+      loginAndConsent.checks.add(check)
+    }
+  }
+
+  return {
+    policy: [loginAndConsent],
+    url: (ctx, interaction) => {
+      return `/interaction/${ctx.oidc.uid}`
+    }
   }
 }
-
-export default interactions

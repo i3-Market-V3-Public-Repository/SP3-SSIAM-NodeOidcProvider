@@ -3,7 +3,7 @@ import * as assert from 'assert'
 import * as querystring from 'querystring'
 import { inspect } from 'util'
 import { isEmpty } from 'lodash'
-import Provider, { KoaContextWithOIDC, errors as oidcErrors, InteractionResults } from 'oidc-provider'
+import Provider, { errors as oidcErrors, InteractionResults } from 'oidc-provider'
 import { Credentials, SimpleSigner } from 'uport-credentials'
 import { message, transport } from 'uport-transports'
 import { getResolver } from 'ethr-did-resolver'
@@ -12,10 +12,12 @@ import { Resolver } from 'did-resolver'
 
 import logger from '@i3-market/logger'
 import config from '@i3-market/config'
+import { retry } from '@i3-market/util'
 import { AccountNotFount, IncorrectPassword } from '@i3-market/error'
-import { SocketHandler } from '@i3-market/ws/utils'
-import WebSocketServer from '@i3-market/ws'
-import Account from '@i3-market/account'
+import WebSocketServer, { SocketHandler } from '@i3-market/ws'
+import { random, Cipher } from '@i3-market/security'
+
+import { disclosureArgs, fetchClaims, UportClaims } from './uport-scopes'
 
 const { SessionNotFound } = oidcErrors
 const keys = new Set()
@@ -28,82 +30,97 @@ const debug = (obj) => querystring.stringify(Object.entries(obj).reduce((acc, [k
   encodeURIComponent (value) { return keys.has(value) ? `<strong>${value}</strong>` : value }
 })
 
-interface SocketParams {
-  uid: string
-}
+interface Params { [key: string]: string}
+interface InteractionParams extends Params { uid: string }
 
-interface SocketData {
-  hello: string
-}
+interface SelectiveDisclousureResponseBody { error: any, access_token: string }
+interface LoginBody { code?: string }
 
 export default class InteractionController {
   protected credentials: Credentials
+  protected cipher: Cipher
 
   constructor (protected provider: Provider,
     protected wss: WebSocketServer) { }
 
-  public async initialize () {
-    const providerConfig = { rpcUrl: 'https://rinkeby.infura.io/ethr-did' }
+  public async initialize (): Promise<void> {
+    const providerConfig = { rpcUrl: config.rpcUrl }
     const identity = await config.identityPromise
+
     this.credentials = new Credentials({
       did: identity.did,
       signer: SimpleSigner(identity.privateKey),
       resolver: new Resolver(getResolver(providerConfig))
     })
+
+    const secret = await random(256 / 8)
+    this.cipher = new Cipher('aes-256-gcm', secret)
   }
 
   // WebSocket Methods
-  socketConnect: SocketHandler<SocketParams> = async (socket, req, next) => {
+  socketConnect: SocketHandler<InteractionParams> = async (socket, req, next) => {
     socket.tag(req.params.uid)
   }
 
-  socketMessage: SocketHandler<SocketParams, SocketData> = async (socket, req, next) => {
-    logger.debug('Message socket')
-    const json = req.json()
-    console.log(json.hello)
-  }
-
-  socketClose: SocketHandler<SocketParams> = async (socket, req, next) => {
+  socketClose: SocketHandler<InteractionParams> = async (socket, req, next) => {
     logger.debug('Close socket')
   }
 
   // App Methods
-  callback: RequestHandler = async (req, res, next) => {
+
+  // Callback handler where the selective disclosure is resolved
+  callback: RequestHandler<InteractionParams, any, SelectiveDisclousureResponseBody> = async (req, res, next) => {
     const { error: err, access_token: accessToken } = req.body
     const { uid } = req.params
 
     if (err) {
+      if (typeof err === 'string') {
+        logger.error(`Selective disclosure error: ${err}`)
+      } else {
+        logger.error('Unknown selective disclosure error')
+      }
       return res.status(403).send(err)
     }
 
     logger.debug(`Received the access token for the interaction "${uid}"`)
-    const credentials = await this.credentials.authenticateDisclosureResponse(accessToken)
 
-    // TODO: Verify mandatory credentials
-    console.log(credentials)
+    // 
+    const socket = await retry(() => this.wss.get(uid), {
+      interval: 500, // ms
+      tries: 20 // 500 ms * 20 = 10s
+    }).catch((reason) => {
+      res.status(400).send(reason.message)
+      logger.error('Cannot connect the socket')
+    })
 
-    // const didDocument = await this.credentials.resolver.resolve(credentials.did)
-    // console.log(didDocument)
-
-    // TODO: Finish login here
-    // TODO: Consent accepted here
-
-    const socket = this.wss.get(uid)
-    if (!socket) {
-      logger.debug('The client was disconnected before sending the did...')
-    } else {
-      // this.provider.setProviderSession(req, res, {
-
-      // })
-      socket.send(credentials.did)
-      socket.close()
+    if (socket === undefined) {
+      return
     }
+
+    // const jwt = await sign(loginJwt, this.privateKey)
+    logger.debug(`uPort access token: ${accessToken}`)
+    logger.debug('Encrypt the access token')
+    const encryptedAccessToken = await this.cipher.encryptString(accessToken)
+
+    // Close the socket once the access token is sent
+    socket.send(encryptedAccessToken, (err) => {
+      if (!err) {
+        socket.close()
+        return
+      }
+
+      logger.error('Error sending the access token')
+      console.trace(err)
+    })
+
+    res.send(200)
   }
 
   handleInteraction: RequestHandler = async (req, res, next) => {
     const {
       uid, prompt, params, session
     } = await this.provider.interactionDetails(req, res)
+    const scope = params.scope
 
     const client = await this.provider.Client.find(params.client_id)
     const options = {
@@ -115,7 +132,7 @@ export default class InteractionController {
 
       // Debug info
       isProd: config.isProd,
-      session: session ? debug(session) : undefined,
+      session: session !== undefined ? debug(session) : undefined,
       dbg: {
         params: debug(params),
         prompt: debug(prompt)
@@ -123,36 +140,16 @@ export default class InteractionController {
     }
 
     switch (prompt.name) {
-      case 'select_account': {
-        logger.debug('Select account interaction received')
-        if (!session) {
-          return await this.provider.interactionFinished(req, res, { select_account: {} }, { mergeWithLastSubmission: false })
-        }
-
-        // Types from oidc provider force this cast
-        const ctx: KoaContextWithOIDC = undefined as any
-        const account = await this.provider.Account
-          .findAccount(ctx, session.accountId.toString())
-
-        // TODO: Check undefined account
-        if (!account) return
-        const { email } = await account.claims('prompt', 'email', { email: null }, [])
-
-        return res.render('select_account', {
-          ...options,
-          email
-        })
-      }
-
-      case 'login': {
+      case 'loginAndConsent': {
         // NOTE: To work with uPort, the callback URL MUST use TLS
         const callbackUrl = `https://${req.get('host')}/interaction/${uid}/callback`
+        const disclosureOptions = disclosureArgs(scope.split(' '))
         const reqToken = await this.credentials.createDisclosureRequest({
+          ...disclosureOptions,
           // TODO: claims Requirements for claims requested from a user. See Claims Specs and Verified Claims
           notifications: true,
           callbackUrl
         })
-        logger.debug(reqToken)
 
         const query = message.util.messageToURI(reqToken)
         const uri = message.util.paramsToQueryString(query, { callback_type: 'post' })
@@ -177,80 +174,87 @@ export default class InteractionController {
     }
   }
 
-  login: RequestHandler = async (req, res, next) => {
-    const { prompt: { name } } = await this.provider.interactionDetails(req, res)
-    assert.equal(name, 'login')
+  loginAndConsent: RequestHandler<InteractionParams, any, LoginBody> = async (req, res, next) => {
+    logger.debug('Login method called')
+    const details = await this.provider.interactionDetails(req, res)
 
-    if (req.body.did) {
-      logger.debug(`Check login for "${req.body.did}"`)
-    } else {
-      logger.debug(`Check login for "${req.body.login}"`)
-      const account = await Account.findByLogin(req.body.login)
-      if (!account) {
-        throw new AccountNotFount(req.body.login)
-      }
+    const { prompt: { name }, params } = details
+    const scope: string = params.scope
+    const clientId = params.client_id
+    const sessionData: any = details.session
 
-      if (!await account.checkPassword(req.body.password)) {
-        throw new IncorrectPassword(req.body.login)
-      }
+    assert.equal(name, 'loginAndConsent')
+
+    if (!req.body.code) {
+      logger.error('No code provided')
+      throw new Error('No code provided')
     }
 
+    const encryptedAccessToken = req.body.code
+    const accessToken = await this.cipher.decryptString(encryptedAccessToken)
+    let claims: UportClaims
+    try {
+      const discResponse = await this.credentials.authenticateDisclosureResponse(accessToken)
+      claims = fetchClaims(scope.split(' '), discResponse)
+    } catch (err) {
+      console.trace(err)
+      return res.status(400).send({
+        err: 'cannot authenticate the selective disclosure response'
+      })
+    }
+
+    // Update de session
+    // TODO: Resolve the claims properly
+
+    // TODO: Check invalid credentials and add them into rejected scopes and claims
     // TODO: Use interaction id as account id
-    const result: InteractionResults = {
-      select_account: {}, // make sure its skipped by the interaction policy since we just logged in
-      login: {
-        account: req.body.did,
-        remember: false
+    let result: InteractionResults
+    let previousMeta: any = {}
+
+    if (sessionData?.uid !== undefined) {
+      const session = await this.provider.Session.findByUid(sessionData.uid)
+      if (session !== undefined) {
+        previousMeta = session.metaFor(clientId)
       }
     }
 
-    await this.provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false })
-  }
+    if (claims.rejectedScopes.length === 0) {
+      result = {
+        select_account: {}, // make sure its skipped by the interaction policy since we just logged in
+        login: {
+          account: claims.sub,
+          remember: false
+        },
+        consent: {
+          // any scopes you do not wish to grant go in here
+          //   otherwise details.scopes.new.concat(details.scopes.accepted) will be granted
+          rejectedScopes: [],
 
-  continue: RequestHandler = async (req, res, next) => {
-    const interaction = await this.provider.interactionDetails(req, res)
-    const { prompt: { name } } = interaction
-    assert.equal(name, 'select_account')
+          // any claims you do not wish to grant go in here
+          //   otherwise all claims mapped to granted scopes
+          //   and details.claims.new.concat(details.claims.accepted) will be granted
+          rejectedClaims: [],
 
-    if (req.body.switch) {
-      if (interaction.params.prompt) {
-        const prompts = new Set(interaction.params.prompt.split(' '))
-        prompts.add('login')
-        interaction.params.prompt = [...prompts].join(' ')
-      } else {
-        interaction.params.prompt = 'login'
+          // replace = false means previously rejected scopes and claims remain rejected
+          // changing this to true will remove those rejections in favour of just what you rejected above
+          replace: false
+        },
+
+        meta: {
+          ...previousMeta,
+          [scope]: Buffer.from(JSON.stringify(claims)).toString('base64')
+        }
       }
-      await interaction.save()
+    } else {
+      result = {
+        error: 'access_denied',
+        error_description: 'A mandatory verifiable claim is missing or has an untrusted signer'
+      }
     }
-
-    const result = { select_account: {} }
     await this.provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false })
   }
 
-  confirm: RequestHandler = async (req, res, next) => {
-    const { prompt: { name } } = await this.provider.interactionDetails(req, res)
-    assert.equal(name, 'consent')
-
-    // TODO: Set rejected claims comming from uport (credentials.invalid)
-    const consent = {
-      // any scopes you do not wish to grant go in here
-      //   otherwise details.scopes.new.concat(details.scopes.accepted) will be granted
-      rejectedScopes: [],
-
-      // any claims you do not wish to grant go in here
-      //   otherwise all claims mapped to granted scopes
-      //   and details.claims.new.concat(details.claims.accepted) will be granted
-      rejectedClaims: [],
-
-      // replace = false means previously rejected scopes and claims remain rejected
-      // changing this to true will remove those rejections in favour of just what you rejected above
-      replace: false
-    }
-
-    const result = { consent }
-    await this.provider.interactionFinished(req, res, result, { mergeWithLastSubmission: true })
-  }
-
+  // TODO: Remove this??
   abort: RequestHandler = async (req, res, next) => {
     const result = {
       error: 'access_denied',

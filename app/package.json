@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "docs": "",
-    "run:dev": " DOTENV_CONFIG_PATH='./misc/dev.env' nodemon -e json,ts -w ./src -r ts-node/register -r dotenv/config --inspect=0.0.0.0:9229 -- ./src",
+    "run:dev": "nodemon -r ts-node/register -r dotenv/config --inspect=0.0.0.0:9229 ./src",
     "prebuild": "npm run oas",
     "build": "ts-node scripts/build.ts",
     "start": "npm run run:dev",
@@ -13,7 +13,7 @@
     "lint": "ts-standard",
     "identity": "ts-node scripts/new-identity.ts",
     "prestart": "npm run build",
-    "oas": "swagger-cli bundle --outfile ./src/oas/api.json ./src/oas/api.yaml",
+    "oas": "swagger-cli bundle --outfile ./src/routes/api-spec/api.json ./src/routes/api-spec/api.yaml",
     "clean": "ts-node scripts/clean.ts"
   },
   "keywords": [],
@@ -40,6 +40,7 @@
     "nodemon": "^2.0.4",
     "openapi-types": "^7.0.1",
     "rimraf": "^3.0.2",
+    "source-map-support": "^0.5.19",
     "ts-node": "^9.0.0",
     "ts-standard": "^10.0.0",
     "typescript": "^4.0.3"
@@ -52,6 +53,7 @@
     "dotenv": "^8.2.0",
     "ethr-did-resolver": "^3.0.1",
     "express": "^4.17.1",
+    "express-openapi-validator": "^4.10.11",
     "lodash": "^4.17.20",
     "module-alias": "^2.2.2",
     "mongodb": "^3.6.2",

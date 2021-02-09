@@ -15,7 +15,7 @@
   },
   "servers": [
     {
-      "url": "/oidc",
+      "url": "/",
       "description": "Local testing server"
     }
   ],
@@ -33,10 +33,14 @@
       "externalDocs": {
         "url": "https://openid.net/specs/openid-connect-discovery-1_0.html"
       }
+    },
+    {
+      "name": "RP",
+      "description": "Rely Party client managent endpoints, including login, registration, etc"
     }
   ],
   "paths": {
-    "/.well-known/openid-configuration": {
+    "/oidc/.well-known/openid-configuration": {
       "get": {
         "tags": [
           "OIDC Discovery"
@@ -208,7 +212,7 @@
         }
       }
     },
-    "/jwks": {
+    "/oidc/jwks": {
       "get": {
         "tags": [
           "OIDC Core"
@@ -278,7 +282,7 @@
         }
       }
     },
-    "/auth": {
+    "/oidc/auth": {
       "get": {
         "summary": "request authorization code",
         "operationId": "authorizationCode",
@@ -478,7 +482,7 @@
         }
       }
     },
-    "/token": {
+    "/oidc/token": {
       "post": {
         "tags": [
           "OIDC Core"
@@ -513,11 +517,12 @@
                     "type": "string",
                     "description": "REQUIRED, if the `redirect_uri` parameter was included in the authorization request and their values MUST be identical.",
                     "format": "uri",
-                    "example": "https://api.server.com/callback"
+                    "example": "http://oidc-rp:7080/oauth/callback"
                   },
                   "client_id": {
                     "type": "string",
-                    "description": "the registered client id.\n\nREQUIRED, if the client is not authenticating with the authorization server (e.g. when using PKCE)\n"
+                    "description": "the registered client id.\n\nREQUIRED, if the client is not authenticating with the authorization server (e.g. when using PKCE)\n",
+                    "example": "oidcCLIENT"
                   },
                   "code_verifier": {
                     "maxLength": 128,
@@ -669,7 +674,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/paths/~1token/post/responses/400/content/application~1json/schema"
+                  "$ref": "#/paths/~1oidc~1token/post/responses/400/content/application~1json/schema"
                 }
               }
             }
@@ -681,6 +686,109 @@
           },
           {}
         ]
+      }
+    },
+    "/rp/register": {
+      "post": {
+        "summary": "Register a new client",
+        "operationId": "rpCreate",
+        "tags": [
+          "RP"
+        ],
+        "requestBody": {
+          "description": "Creation method",
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "RegisterRequest",
+                "description": "Relying party registartion object\n",
+                "type": "object",
+                "required": [
+                  "clientId",
+                  "clientSecret",
+                  "redirectUris"
+                ],
+                "properties": {
+                  "clientId": {
+                    "type": "string",
+                    "default": "someid"
+                  },
+                  "clientSecret": {
+                    "type": "string",
+                    "default": "gRbFEk3WWF"
+                  },
+                  "redirectUris": {
+                    "title": "UriArray",
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "default": "http://example.foo/some/path",
+                      "format": "uri"
+                    }
+                  },
+                  "postLogoutRedirectUris": {
+                    "$ref": "#/paths/~1rp~1register/post/requestBody/content/application~1json/schema/properties/redirectUris"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rely party client account created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "RegisterResponse",
+                  "description": "Relying party registartion response\n",
+                  "type": "object",
+                  "required": [
+                    "clientId",
+                    "redirectUris"
+                  ],
+                  "properties": {
+                    "clientId": {
+                      "type": "string"
+                    },
+                    "redirectUris": {
+                      "$ref": "#/paths/~1rp~1register/post/requestBody/content/application~1json/schema/properties/redirectUris"
+                    },
+                    "postLogoutRedirectUris": {
+                      "$ref": "#/paths/~1rp~1register/post/requestBody/content/application~1json/schema/properties/redirectUris"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Error",
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },

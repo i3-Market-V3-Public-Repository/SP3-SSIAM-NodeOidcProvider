@@ -12,7 +12,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 
 servers:
-  - url: /oidc
+  - url: /
     description: Local testing server
 
 tags:
@@ -25,19 +25,24 @@ tags:
     description: The OpenID Connect Discovery 1.0 specification defines a mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
     externalDocs:
       url: https://openid.net/specs/openid-connect-discovery-1_0.html
+  - name: RP
+    description: Rely Party client managent endpoints, including login, registration, etc
 
 paths:
-  /.well-known/openid-configuration:
-    $ref: './paths/well-known-openid-configuration.yaml#/paths/~1.well-known~1openid-configuration'
-  
-  /jwks:
-    $ref: './paths/jwks.yaml#/paths/~1jwks'
+  /oidc/.well-known/openid-configuration:
+    $ref: './paths/oidc/well-known-openid-configuration.yaml#/paths/~1.well-known~1openid-configuration'
 
-  /auth:
-    $ref: "./paths/auth.yaml#/paths/~1auth"
+  /oidc/jwks:
+    $ref: './paths/oidc/jwks.yaml#/paths/~1jwks'
 
-  /token:
-    $ref: "./paths/token.yaml#/paths/~1token"
+  /oidc/auth:
+    $ref: "./paths/oidc/auth.yaml#/paths/~1auth"
+
+  /oidc/token:
+    $ref: "./paths/oidc/token.yaml#/paths/~1token"
+
+  /rp/register:
+    $ref: "./paths/rp/register.yaml#/paths/~1register"
 
 components:
   securitySchemes:
