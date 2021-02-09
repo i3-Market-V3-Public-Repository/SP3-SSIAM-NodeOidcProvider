@@ -2,7 +2,8 @@
 
 An OpenID Provider for i3-Market.
 
-## Install
+## Installation
+
 Clone the repository with
 
 ```console 

@@ -5,7 +5,6 @@ ARG GROUP_ID=1000
 
 WORKDIR /app
 
-USER root
 RUN mkdir /ssh && chmod 777 /app /ssh
 RUN groupadd --gid ${GROUP_ID} appuser; exit 0
 RUN if [ "$UID" != "S{USER_ID}" ]; then echo ${USER_ID} > .uid; useradd -g ${GROUP_ID} --create-home --uid $(cat .uid) appuser; rm .uid; fi
