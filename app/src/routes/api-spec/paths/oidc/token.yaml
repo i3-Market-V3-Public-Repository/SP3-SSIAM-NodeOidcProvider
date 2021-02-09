@@ -1,6 +1,6 @@
 openapi: '3.0.3'
 info:
-  description: The API of the i3Market OpenID Connect Provider. 
+  description: The API of the i3Market OpenID Connect Provider.
   version: 0.9.0
   title: i3-market OpenID Connect Provider API
   contact:
@@ -117,13 +117,14 @@ components:
           type: string
           description: REQUIRED, if the `redirect_uri` parameter was included in the authorization request and their values MUST be identical.
           format: uri
-          example: https://api.server.com/callback
+          example: http://oidc-rp:7080/oauth/callback
         client_id:
           type: string
           description: |
             the registered client id.
             
             REQUIRED, if the client is not authenticating with the authorization server (e.g. when using PKCE)
+          example: oidcCLIENT
         code_verifier:
           maxLength: 128
           minLength: 43

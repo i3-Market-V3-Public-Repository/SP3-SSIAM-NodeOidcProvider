@@ -1,23 +1,16 @@
 import { Configuration } from 'oidc-provider'
 
-import { loadJSON } from '@i3-market/util'
 import config from '@i3-market/config'
 import Account from '@i3-market/account'
 
+import keys from './keys'
 import interactions from './interactions'
-import logger from '@i3-market/logger'
 
 export default async (): Promise<Configuration> => {
-  const keys = await loadJSON(config.jwksKeysPath)
-  if (!keys) {
-    logger.error('JWKS file not fount')
-  }
-
   return {
     findAccount: Account.findAccount,
-    interactions,
+    interactions: await interactions(),
 
-    // TODO: Remove userinfo endpoint
     // TODO: Implement this function to add custom error views
     // renderError: async (ctx, out, error) => {
     //   return
@@ -26,20 +19,48 @@ export default async (): Promise<Configuration> => {
     pkce: {
       methods: ['S256'],
       required: (ctx, client) => {
-        return client.tokenEndpointAuthMethod === 'none';
+        return client.tokenEndpointAuthMethod === 'none'
       }
     },
 
-    claims: {
-      openid: ['sub', 'profile']
+    // TODO: Chek if this function can be used to notify with optional vc are not sent/untrusted
+    extraAccessTokenClaims: (ctx, token) => {
+
     },
-    jwks: { keys },
+
+    expiresWithSession (ctx, token) {
+      return true
+    },
+
+    formats: {
+      AccessToken: 'jwt'
+    },
+
+    claims: {
+      openid: ['sub'],
+      vc: ['verified_claims'],
+      // TODO: check specific fields
+      profile: ['name', 'family_name']
+    },
+    // TODO: Buscar informacion para pedir individual claims
+    dynamicScopes: [
+      /^vc:(.+)$/,
+      /^vce:(.+)$/
+    ],
+    jwks: {
+      keys: await keys()
+    },
 
     features: {
+      claimsParameter: { enabled: true },
       devInteractions: { enabled: false },
 
       introspection: { enabled: true },
-      revocation: { enabled: true }
+      revocation: { enabled: true },
+
+      // Disable this to append
+      userinfo: { enabled: false },
+      jwtUserinfo: { enabled: false }
     },
 
     cookies: {

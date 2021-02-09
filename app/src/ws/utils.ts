@@ -51,6 +51,7 @@ export interface IRouter<T> {
   use: RouteHandler<T>
   connect: RouteHandler<T>
   message: RouteHandler<T>
+  keepAlive: RouteHandler<T>
   close: RouteHandler<T>
 }
 
