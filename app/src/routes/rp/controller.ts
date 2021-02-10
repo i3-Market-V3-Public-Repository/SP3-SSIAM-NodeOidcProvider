@@ -1,5 +1,6 @@
 import { ErrorRequestHandler, RequestHandler } from 'express'
 import Provider, { Adapter, AdapterPayload } from 'oidc-provider'
+import * as _ from 'lodash'
 
 import { adapterFactory } from '@i3-market/adapter'
 import { ErrorResponse } from '@i3-market/error'
@@ -34,6 +35,7 @@ export default class Controller {
       client_id: id,
       client_secret: body.clientSecret,
       redirect_uris: body.redirectUris,
+      token_endpoint_auth_method: body.tokenEndpointAuthMethod,
       post_logout_redirect_uris: body.postLogoutRedirectUris
     })
 
@@ -50,6 +52,7 @@ export default class Controller {
     res.status(201).send({
       clientId: id,
       redirectUris: body.redirectUris,
+      tokenEndpointAuthMethod: body.tokenEndpointAuthMethod,
       postLogoutRedirectUris: body.postLogoutRedirectUris
     })
   }
