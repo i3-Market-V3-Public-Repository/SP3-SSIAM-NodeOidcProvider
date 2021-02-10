@@ -12,7 +12,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 
 servers:
-  - url: http://localhost:3000/oidc
+  - url: /
     description: Local testing server
 
 tags:

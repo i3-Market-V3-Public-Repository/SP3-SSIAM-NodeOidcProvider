@@ -320,7 +320,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "oidcCLIENT"
+            "example": "oidcRpACG"
           },
           {
             "name": "redirect_uri",
@@ -330,7 +330,7 @@
             "schema": {
               "type": "string",
               "format": "uri",
-              "example": "http://oidc-rp:7080/oauth/callback"
+              "example": "http://localhost:3001/oidc/cb"
             }
           },
           {

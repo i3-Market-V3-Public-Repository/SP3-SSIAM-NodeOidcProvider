@@ -13,7 +13,7 @@ async function main () {
   const client = new issuer.Client({
     client_id: 'oidcCLIENT',
     client_secret: 'supersecret',
-    redirect_uris: ['http://localhost:3001/oidcLogin'],
+    redirect_uris: ['http://localhost:3001/oidc/cb'],
     response_types: ['code']
   })
 }
