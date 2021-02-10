@@ -9,7 +9,7 @@ import logger, { loggerMiddleware } from './logger'
 import Adapter from './adapter'
 import { addEndpoint } from './endpoint'
 import WebSocketServer from './ws'
-import passport from './passport'
+import passportPromise from './passport'
 
 import { oidcEndpoint, interactionEndpoint, rpEndpoint, apiSpecEndpoint } from './routes'
 
@@ -34,6 +34,7 @@ export async function main (): Promise<void> {
   const app = express()
   const server = http.createServer(app)
   const wss = new WebSocketServer(server)
+  const passport = await passportPromise()
 
   // View
   app.set('views', path.join(__dirname, 'views'))

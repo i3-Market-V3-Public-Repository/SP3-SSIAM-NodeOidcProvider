@@ -1,6 +1,6 @@
 import * as http from 'http'
 import * as https from 'https'
-import * as ws from 'ws'
+import ws from 'ws'
 
 import logger from '@i3-market/logger'
 
@@ -36,7 +36,7 @@ export class WebSocketServer implements IRouter<WebSocketServer> {
     // Initialize web socket server
     this.wss = new ws.Server({ server })
     this.wss.on('connection', (wsoc, req: Request) => {
-      const socket = this.prepareSocket(wsoc)
+      const socket = this.prepareSocket(wsoc as Socket)
       this.handle(socket, req, Methods.connect)
 
       wsoc.on('message', (data) => {
@@ -86,18 +86,15 @@ export class WebSocketServer implements IRouter<WebSocketServer> {
     return this.tags[t]
   }
 
-  prepareSocket (socket: ws): Socket {
-    const server = this
-    return Object.assign(socket, {
-      tag (t: string): Socket {
-        // Set the tag to the socket
-        this[socketTag] = t
-
-        // Add the socket server using its tag
-        server.tags[t] = this
-        return this
-      }
-    })
+  prepareSocket (socket: Socket): Socket {
+    socket.tag = (t: string): Socket => {
+      // Set the tag to the socket
+      socket[socketTag] = t
+      // Add the socket server using its tag
+      this.tags[t] = socket
+      return socket
+    }
+    return socket
   }
 
   initRequest (req: Request, method: Methods): void {
