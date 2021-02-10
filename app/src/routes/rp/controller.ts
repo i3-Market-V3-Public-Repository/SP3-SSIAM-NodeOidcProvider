@@ -18,7 +18,7 @@ export default class Controller {
   constructor (protected provider: Provider) {
     this.clientAdapter = adapterFactory.createIfNotExists('client')
     this.clientDefaults = {
-      grant_types: ['refresh_token', 'authorization_code'],
+      grant_types: ['authorization_code'],
       token_endpoint_auth_method: 'none'
     }
   }

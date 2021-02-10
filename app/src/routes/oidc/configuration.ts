@@ -1,4 +1,4 @@
-import { Configuration } from 'oidc-provider'
+import { Configuration, errors } from 'oidc-provider'
 
 import config from '@i3-market/config'
 import Account from '@i3-market/account'
@@ -12,9 +12,10 @@ export default async (): Promise<Configuration> => {
     interactions: await interactions(),
 
     // TODO: Implement this function to add custom error views
-    // renderError: async (ctx, out, error) => {
-    //   return
-    // },
+    renderError: async (ctx, out, error: errors.OIDCProviderError) => {
+      console.error(`${error.message}: ${error.error_description ?? ''}\n${error.stack ?? ''}`)
+      throw error
+    },
 
     pkce: {
       methods: ['S256'],

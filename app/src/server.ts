@@ -1,6 +1,5 @@
 import * as path from 'path'
 import express from 'express'
-import * as bodyParser from 'body-parser'
 import * as http from 'http'
 import * as ngrok from 'ngrok'
 
@@ -39,8 +38,8 @@ export async function main (): Promise<void> {
   // View
   app.set('views', path.join(__dirname, 'views'))
   app.set('view engine', 'ejs')
-  app.use(bodyParser.json())
-  app.use(bodyParser.urlencoded())
+  app.use(express.json())
+  app.use(express.urlencoded({ extended: false }))
   app.use(passport.initialize())
 
   // Add middlewares

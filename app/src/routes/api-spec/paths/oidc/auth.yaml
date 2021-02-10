@@ -3,7 +3,7 @@ info:
   title: oidc authorization endpoint
   version: 0.9.0
 servers:
-  - url: http://localhost:3000/oidc
+  - url: /
     description: 'Development server'
 paths:
   /auth:
@@ -74,7 +74,7 @@ components:
       required: true
       schema:
         type: string
-      example: oidcCLIENT
+      example: oidcRpACG
     auth_req_redirect_uri:
       name: redirect_uri
       in: query
@@ -83,7 +83,7 @@ components:
       schema:
         type: string
         format: uri
-        example: http://oidc-rp:7080/oauth/callback
+        example: http://localhost:3001/oidc/cb
     auth_req_state:
       name: state
       in: query
