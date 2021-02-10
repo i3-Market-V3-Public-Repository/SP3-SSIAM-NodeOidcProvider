@@ -23,10 +23,5 @@
             "@i3-market/*": [ "src/*" ],
         }
     },
-    "files": [
-        "./src/index.ts",
-        "./src/util.ts",
-        "./scripts/build.ts",
-        "./test/index.ts",
-    ]
+    "include": [ "src/**/*.ts", "test/**/*.ts" ]
 }

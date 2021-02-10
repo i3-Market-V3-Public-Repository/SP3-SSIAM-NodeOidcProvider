@@ -46,6 +46,5 @@ paths:
 
 components:
   securitySchemes:
-    ClientAuth:     # <-- arbitrary name for the security scheme
-      type: http
-      scheme: basic
+    BasicAuth:
+      $ref: "src/routes/api-spec/security-schemes/basic.yaml#/basicAuth"

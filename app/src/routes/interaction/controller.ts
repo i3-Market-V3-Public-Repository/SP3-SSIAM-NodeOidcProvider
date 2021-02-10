@@ -84,7 +84,7 @@ export default class InteractionController {
 
     logger.debug(`Received the access token for the interaction "${uid}"`)
 
-    // 
+    //
     const socket = await retry(() => this.wss.get(uid), {
       interval: 500, // ms
       tries: 20 // 500 ms * 20 = 10s

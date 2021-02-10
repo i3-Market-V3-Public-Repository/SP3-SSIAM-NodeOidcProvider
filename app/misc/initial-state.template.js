@@ -23,6 +23,6 @@ const clients = [
 const profiles = [
   {
     email: 'test@i3-market.eu',
-    password: '$2b$13$2Og4QICwbTPodaBa2BUInOp6lE3KTIIGaCIn3XJSCENgmAiUXajZG'
+    password: '$2b$13$2Og4QICwbTPodaBa2BUInOp6lE3KTIIGaCIn3XJSCENgmAiUXajZG' // i3market
   }
 ]

@@ -35,6 +35,8 @@ paths:
       operationId: rpCreate
       tags:
         - RP
+      security:
+        - BasicAuth: []
       requestBody:
         description: Creation method
         required: false
@@ -118,3 +120,7 @@ components:
         type: string
         default: http://example.foo/some/path
         format: uri
+
+  securitySchemes:
+    BasicAuth:
+      $ref: "../../security-schemes/basic.yaml#/basicAuth"

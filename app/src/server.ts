@@ -1,5 +1,5 @@
 import * as path from 'path'
-import * as express from 'express'
+import express from 'express'
 import * as bodyParser from 'body-parser'
 import * as http from 'http'
 import * as ngrok from 'ngrok'
@@ -9,6 +9,7 @@ import logger, { loggerMiddleware } from './logger'
 import Adapter from './adapter'
 import { addEndpoint } from './endpoint'
 import WebSocketServer from './ws'
+import passport from './passport'
 
 import { oidcEndpoint, interactionEndpoint, rpEndpoint, apiSpecEndpoint } from './routes'
 
@@ -38,6 +39,8 @@ export async function main (): Promise<void> {
   app.set('views', path.join(__dirname, 'views'))
   app.set('view engine', 'ejs')
   app.use(bodyParser.json())
+  app.use(bodyParser.urlencoded())
+  app.use(passport.initialize())
 
   // Add middlewares
   app.use(loggerMiddleware)

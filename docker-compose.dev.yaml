@@ -22,7 +22,7 @@ services:
       - ./app:/app
       - oidc-ssh:/ssh
     ports:
-      - 127.0.0.1:3000:3000
+      - 127.0.0.1:30002:3000
       - 127.0.0.1:9229:9229
     command:
       - ./scripts/start.sh

@@ -86,7 +86,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccessTokenErrorResponse'
       security:
-      - ClientAuth: []
+      - BasicAuth: []
       - {}
 
 components:
@@ -224,3 +224,7 @@ components:
           format: uri
       required:
         - error
+  
+  securitySchemes:
+    BasicAuth:
+      $ref: "../../security-schemes/basic.yaml#/basicAuth"
