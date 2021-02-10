@@ -36,11 +36,10 @@ export default async (): Promise<Configuration> => {
       AccessToken: 'jwt'
     },
 
+    scopes: ['openid', 'vc', 'vc:*', 'vce:*'],
     claims: {
       openid: ['sub'],
-      vc: ['verified_claims'],
-      // TODO: check specific fields
-      profile: ['name', 'family_name']
+      vc: ['verified_claims']
     },
     // TODO: Buscar informacion para pedir individual claims
     dynamicScopes: [
