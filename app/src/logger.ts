@@ -1,4 +1,4 @@
-import * as morgan from 'morgan'
+import morgan from 'morgan'
 import { Request } from 'express'
 import { createLogger, transports, format, Logger } from 'winston'
 import config from './config'

@@ -47,4 +47,4 @@ paths:
 components:
   securitySchemes:
     BasicAuth:
-      $ref: "src/routes/api-spec/security-schemes/basic.yaml#/basicAuth"
+      $ref: "./security-schemes/basic.yaml#/basicAuth"

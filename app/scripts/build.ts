@@ -5,7 +5,7 @@ import { promisify } from 'util'
 import { spawn, SpawnOptions } from 'child_process'
 
 // import * as glob from "glob"
-import * as rimraf from 'rimraf'
+import rimraf from 'rimraf'
 
 // Global variables
 const cpPromise = promisify(fs.copyFile)
