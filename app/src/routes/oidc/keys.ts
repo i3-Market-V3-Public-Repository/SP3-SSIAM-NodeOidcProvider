@@ -1,10 +1,8 @@
-import { JSONWebKey } from 'jose'
-
 import { loadJSON } from '@i3-market/util'
 import config from '@i3-market/config'
 
-let keys: JSONWebKey[] | undefined
-export default async (): Promise<JSONWebKey[]> => {
+let keys: [] | undefined
+export default async (): Promise<any[]> => {
   if (keys === undefined) {
     keys = await loadJSON(config.jwksKeysPath)
   }

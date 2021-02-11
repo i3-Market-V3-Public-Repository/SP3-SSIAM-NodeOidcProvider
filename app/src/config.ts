@@ -2,12 +2,21 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { promisify } from 'util'
 import { Credentials } from 'uport-credentials'
+import { randomFillSync } from 'crypto'
 
 type Identity = ReturnType<typeof Credentials.createIdentity>
 type ConvertFunction<T> = (value: string) => T
 
 const readFilePromise = promisify(fs.readFile)
 // type Identity = ReturnType<Credentials>
+
+function generateRandomStrings (byteLength = 32, amount = 1): string[] {
+  const randoms: string[] = []
+  for (let i = 0; i < amount; i++) {
+    randoms.push(randomFillSync(Buffer.alloc(byteLength)).toString('base64'))
+  }
+  return randoms
+}
 
 class Config {
   protected defaults: {[key: string]: string}
@@ -28,7 +37,7 @@ class Config {
       OIDC_PROVIDER_DB_HOST: 'localhost',
       OIDC_PROVIDER_DB_PORT: '27017',
 
-      COOKIES_KEYS: 'gqmYWsfP6Dc6wk6J,Xdmqh4JBDuAc43xt,8WxYvAGmPuEvU8Ap',
+      COOKIES_KEYS: generateRandomStrings(32, 3).join(','),
       JWKS_KEYS_PATH: './misc/jwks.json',
       IDENTITY_PATH: './misc/identity.json',
 
@@ -128,6 +137,13 @@ class Config {
    */
   get useNgrok (): boolean {
     return this.get('OIDC_PROVIDER_NGROK', this.fromBoolean)
+  }
+
+  /**
+   * @property Get identity promise. This identity contains a DID and its associated privateKey
+   */
+  get identityPath (): fs.PathLike {
+    return this.get('IDENTITY_PATH')
   }
 
   /**

@@ -9,6 +9,7 @@ import Adapter from './adapter'
 import { addEndpoint } from './endpoint'
 import WebSocketServer from './ws'
 import passportPromise from './passport'
+import { jwks, did } from './security'
 
 import { oidcEndpoint, interactionEndpoint, rpEndpoint, apiSpecEndpoint } from './routes'
 
@@ -28,6 +29,12 @@ export async function main (): Promise<void> {
   if (Adapter.connect != null) {
     await Adapter.connect()
   }
+
+  // Intialize jwks
+  await jwks({ amount: 3 })
+
+  // Create a new identity if not provided
+  await did()
 
   // Initialize express
   const app = express()
@@ -85,6 +92,6 @@ export async function main (): Promise<void> {
   logger.info(`OpenAPI browsable spec at ${url}/api-spec/ui`)
 }
 
-export function onError (reason: Error): void {
-  logger.error(`Error ${reason.message}`)
+export function onError (reason?: Error): void {
+  logger.error(`Error ${reason !== undefined ? reason.message : 'unknown'}`)
 }
