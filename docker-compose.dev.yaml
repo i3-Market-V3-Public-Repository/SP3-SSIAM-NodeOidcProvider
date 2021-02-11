@@ -14,17 +14,16 @@ services:
       OIDC_PROVIDER_DB_HOST: oidc-provider-db
       OIDC_PROVIDER_DB_PORT: 27017
       OIDC_PROVIDER_DB_USERNAME: oidp
-      OIDC_PROVIDER_DB_PASSWORD: ngk5vnELdNJh3YRW
+      OIDC_PROVIDER_DB_PASSWORD: QGZ4w625UMufe2QT
       OIDC_PROVIDER_DB_DATABASE: oidp
       OIDC_PROVIDER_REVERSE_PROXY: 1
-      OIDC_PROVIDER_ISSUER: https://oidc.i3m.gold.upc.edu/oidc
-      OIDC_PROVIDER_NGROK: 0
+      OIDC_PROVIDER_NGROK: 1
       OIDC_PROVIDER_LOCALHOST_RUN: 1
     volumes:
       - ./app:/app
       - oidc-ssh:/ssh
     ports:
-      - 30002:3000
+      - 127.0.0.1:30002:3000
       - 127.0.0.1:9229:9229
     command:
       - ./scripts/start.sh
@@ -40,7 +39,7 @@ services:
       - oidc-net
     environment:
       MONGO_INITDB_ROOT_USERNAME: oidp
-      MONGO_INITDB_ROOT_PASSWORD: ngk5vnELdNJh3YRW
+      MONGO_INITDB_ROOT_PASSWORD: QGZ4w625UMufe2QT
       MONGO_INITDB_DATABASE: oidp
     ports:
       - 27017:27017
