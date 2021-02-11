@@ -13,12 +13,17 @@ class Config {
   protected defaults: {[key: string]: string}
 
   constructor () {
+    const defaultPort = '3000'
+
     this.defaults = {
       NODE_ENV: 'development',
 
       OIDC_PROVIDER_ISSUER: 'https://localhost:3000',
-      OIDC_PROVIDER_PORT: '3000',
+      OIDC_PROVIDER_HOST: `http://localhost:${defaultPort}`,
+      OIDC_PROVIDER_PORT: defaultPort,
       OIDC_PROVIDER_REVER_PROXY: '0',
+      OIDC_PROVIDER_NGROK: '0',
+      OIDC_PROVIDER_LOCALHOST_RUN: '0',
 
       OIDC_PROVIDER_DB_HOST: 'localhost',
       OIDC_PROVIDER_DB_PORT: '27017',
@@ -69,6 +74,13 @@ class Config {
    */
   get issuer (): string {
     return this.get('OIDC_PROVIDER_ISSUER')
+  }
+
+  /**
+   * @property Server hostname
+   */
+  get host (): string {
+    return this.get('OIDC_PROVIDER_HOST')
   }
 
   /**

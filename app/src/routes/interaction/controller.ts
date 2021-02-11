@@ -142,7 +142,7 @@ export default class InteractionController {
     switch (prompt.name) {
       case 'loginAndConsent': {
         // NOTE: To work with uPort, the callback URL MUST use TLS
-        const callbackUrl = `https://${req.get('host')}/interaction/${uid}/callback`
+        const callbackUrl = `${config.host}/interaction/${uid}/callback`
         const disclosureOptions = disclosureArgs(scope.split(' '))
         const reqToken = await this.credentials.createDisclosureRequest({
           ...disclosureOptions,
