@@ -73,7 +73,7 @@ export async function main (): Promise<void> {
   await listenPromise(server, port)
 
   // Connect to ngrok
-  let url = `http://localhost:${port}`
+  let url = config.host
   if (config.useNgrok) {
     url = await ngrok.connect({ addr: port })
   }
