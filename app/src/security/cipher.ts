@@ -14,7 +14,7 @@ export class Cipher {
    * @returns A string containing the ciphertext, the iv and the auth tag. Both are separated by a dot and base64-encoded
    */
   async encryptString (message: string): Promise<string> {
-    const iv = await random(16)
+    const iv = await random(16) // FIXME: it should depend on the chosen algorithm (block length). Now it is OK (all CipherGCMTypes use a 128bits IV) but it may change in a future
     const cipher = createCipheriv(this.algorithm, this.secret, iv)
 
     // Encrypt

@@ -1,11 +1,13 @@
 
-/app/node_modules
-/app/build
+app/node_modules
+app/build
 
 # Ignore development configuration files
-.vscode
-/app/misc/dev.env
-/app/misc/initial-state.js
+app/misc/identity.json
+# app/misc/jwks.json
 
 # Ignore docker volumes
-/volumes
+volumes
+
+# DB initial state
+db/scripts/mongo-init.js

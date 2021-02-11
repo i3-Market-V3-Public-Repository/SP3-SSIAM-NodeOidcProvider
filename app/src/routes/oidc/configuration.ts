@@ -5,6 +5,7 @@ import Account from '@i3-market/account'
 
 import keys from './keys'
 import interactions from './interactions'
+import logger from '@i3-market/logger'
 
 export default async (): Promise<Configuration> => {
   return {
@@ -13,7 +14,7 @@ export default async (): Promise<Configuration> => {
 
     // TODO: Implement this function to add custom error views
     renderError: async (ctx, out, error: errors.OIDCProviderError) => {
-      console.error(`${error.message}: ${error.error_description ?? ''}\n${error.stack ?? ''}`)
+      logger.error(`${error.message}: ${error.error_description ?? ''}\n${error.stack ?? ''}`)
       throw error
     },
 

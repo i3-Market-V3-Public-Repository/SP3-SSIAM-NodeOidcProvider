@@ -13,7 +13,7 @@ $ cd node-oidc-provider
 
 ## Development
 
-A just-working version using a mongodb initialized with the content in `db/scripts/mongo-init.js`. Update to your needs!
+A just-working version using a mongodb can be used. Before starting the mongo for the first time, copy `db/scripts/mongo-init.template.js` to `db/scripts/mongo-init.js` and update to your needs. The contents of that file are the intial state of the DB. By default it comes with to RP clients, one for WebApps and another for Native Apps or SPAs; as well as an adminsitration account that can be used to create more clients through the API.
 
 ### Usage
 
@@ -78,18 +78,30 @@ docker build . -t i3-market-oidc-provider
 
 To configure the server use the following environmental variables:
 
+> WARNING: Paths should be relative to the `app` directory
+
 ```bash
 # Environment configuration
 NODE_ENV=development # or production
 
 # Server configuration
-OIDC_PROVIDER_ISSUER=http://localhost:3000
-OIDC_PROVIDER_PORT=3000
+# Public URI of the OIDC provider server
+SERVER_PUBLIC_URI=http://localhost:3000
+# Internal port in the host machine that provides access to the OIDC provider server container
+HOST_PORT=3000
+# Reverse proxy. Can be 0 (no reverse proxy) or 1 (reverse proxy). More info about how to configure te reverse proxy on:
+# https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#trusting-tls-offloading-proxies
+REVERSE_PROXY=0
+
+# The JWTs issued by the OIDC provider will have their iss field set to this value (by default it is the SERVER_PUBLIC_URI)
+# OIDC_PROVIDER_ISSUER=https://myoidcprovider.com
+
 
 # Security configuration
 ## Many passwords can be used (comma-separated)
 COOKIES_KEYS=gqmYWsfP6Dc6wk6J,Xdmqh4JBDuAc43xt,8WxYvAGmPuEvU8Ap
 JWKS_KEYS_PATH=./misc/jwks.json
+IDENTITY_PATH=./misc/identity.json
 
 # Database configuration
 OIDC_PROVIDER_DB_HOST=mongo.example.com
@@ -98,9 +110,11 @@ OIDC_PROVIDER_DB_USERNAME=someone
 OIDC_PROVIDER_DB_PASSWORD=a-password
 OIDC_PROVIDER_DB_DATABASE=mydb
 
-# Reverse proxy. More info about how to configure te reverse proxy on:
-# https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#trusting-tls-offloading-proxies
-OIDC_PROVIDER_REVERSE_PROXY=false
+# Blockchain
+RPC_URL=https://rinkeby.infura.io/ethr-did
+
+# List of accepted issuers of verifiable claims
+WHITELIST=./misc/whitelist.js
 ```
 
 ## Additional testing
