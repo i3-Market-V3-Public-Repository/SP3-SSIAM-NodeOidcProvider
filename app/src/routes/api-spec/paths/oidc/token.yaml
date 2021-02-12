@@ -117,14 +117,14 @@ components:
           type: string
           description: REQUIRED, if the `redirect_uri` parameter was included in the authorization request and their values MUST be identical.
           format: uri
-          example: http://oidc-rp:7080/oauth/callback
+          example: http://localhost:3001/oidc/cb
         client_id:
           type: string
           description: |
             the registered client id.
             
             REQUIRED, if the client is not authenticating with the authorization server (e.g. when using PKCE)
-          example: oidcCLIENT
+          example: oidcRpAcg_SpaNativeApps
         code_verifier:
           maxLength: 128
           minLength: 43

@@ -18,7 +18,7 @@ export default async (): Promise<Provider> => {
   }
 
   provider = new Provider(config.issuer, { adapter: Adapter, ...baseOIDCConfig })
-  if (config.revereProxy) {
+  if (config.reverseProxy) {
     logger.debug('Enabling reverse proxy')
     provider.proxy = true
   }

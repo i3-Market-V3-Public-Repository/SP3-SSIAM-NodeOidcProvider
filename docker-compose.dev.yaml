@@ -10,20 +10,13 @@ services:
       dockerfile: ./Dockerfile.dev
     image: i3market/oidc-provider-dev
     container_name: oidc-provider-app
-    environment: 
-      OIDC_PROVIDER_DB_HOST: oidc-provider-db
-      OIDC_PROVIDER_DB_PORT: 27017
-      OIDC_PROVIDER_DB_USERNAME: oidp
-      OIDC_PROVIDER_DB_PASSWORD: QGZ4w625UMufe2QT
-      OIDC_PROVIDER_DB_DATABASE: oidp
-      OIDC_PROVIDER_REVERSE_PROXY: 1
-      OIDC_PROVIDER_NGROK: 1
-      OIDC_PROVIDER_LOCALHOST_RUN: 1
+    env_file:
+      - .env
     volumes:
       - ./app:/app
       - oidc-ssh:/ssh
     ports:
-      - 127.0.0.1:30002:3000
+      - ${HOST_BIND_IP-127.0.0.1}:$HOST_PORT:3000
       - 127.0.0.1:9229:9229
     command:
       - ./scripts/start.sh
@@ -37,10 +30,8 @@ services:
     restart: always
     networks:
       - oidc-net
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: oidp
-      MONGO_INITDB_ROOT_PASSWORD: QGZ4w625UMufe2QT
-      MONGO_INITDB_DATABASE: oidp
+    env_file:
+      - .env
     ports:
       - 27017:27017
     volumes:

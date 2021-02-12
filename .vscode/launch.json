@@ -9,7 +9,7 @@
       "localRoot": "${workspaceFolder}/app",
       "name": "Attach to Remote",
       "port": 9229,
-      "remoteRoot": "Absolute path to the remote directory containing the program",
+      "remoteRoot": "/app",
       "request": "attach",
       "skipFiles": [
         "<node_internals>/**"

@@ -76,46 +76,9 @@ docker build . -t i3-market-oidc-provider
 
 ### Configuration
 
-To configure the server use the following environmental variables:
+Create a `.env` file and configure the server using the environmental variables defined in (template.env)[./template.env].
 
 > WARNING: Paths should be relative to the `app` directory
-
-```bash
-# Environment configuration
-NODE_ENV=development # or production
-
-# Server configuration
-# Public URI of the OIDC provider server
-SERVER_PUBLIC_URI=http://localhost:3000
-# Internal port in the host machine that provides access to the OIDC provider server container
-HOST_PORT=3000
-# Reverse proxy. Can be 0 (no reverse proxy) or 1 (reverse proxy). More info about how to configure te reverse proxy on:
-# https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#trusting-tls-offloading-proxies
-REVERSE_PROXY=0
-
-# The JWTs issued by the OIDC provider will have their iss field set to this value (by default it is the SERVER_PUBLIC_URI)
-# OIDC_PROVIDER_ISSUER=https://myoidcprovider.com
-
-
-# Security configuration
-## Many passwords can be used (comma-separated)
-COOKIES_KEYS=gqmYWsfP6Dc6wk6J,Xdmqh4JBDuAc43xt,8WxYvAGmPuEvU8Ap
-JWKS_KEYS_PATH=./misc/jwks.json
-IDENTITY_PATH=./misc/identity.json
-
-# Database configuration
-OIDC_PROVIDER_DB_HOST=mongo.example.com
-OIDC_PROVIDER_DB_PORT=27017
-OIDC_PROVIDER_DB_USERNAME=someone
-OIDC_PROVIDER_DB_PASSWORD=a-password
-OIDC_PROVIDER_DB_DATABASE=mydb
-
-# Blockchain
-RPC_URL=https://rinkeby.infura.io/ethr-did
-
-# List of accepted issuers of verifiable claims
-WHITELIST=./misc/whitelist.js
-```
 
 ## Additional testing
 

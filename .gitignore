@@ -4,10 +4,15 @@ app/build
 
 # Ignore development configuration files
 app/misc/identity.json
-# app/misc/jwks.json
+app/misc/jwks.json
+
+app/src/routes/api-spec/api.json
 
 # Ignore docker volumes
 volumes
 
 # DB initial state
 db/scripts/mongo-init.js
+
+# Environmental settings
+.env
