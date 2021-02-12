@@ -38,6 +38,17 @@ export default async (): Promise<Configuration> => {
       AccessToken: 'jwt'
     },
 
+    clientDefaults: {
+      grant_types: [
+        'authorization_code'
+      ],
+      id_token_signed_response_alg: 'HS256',
+      response_types: [
+        'code'
+      ],
+      token_endpoint_auth_method: 'client_secret_jwt'
+    },
+
     scopes: ['openid', 'vc', 'vc:*', 'vce:*'],
     claims: {
       openid: ['sub'],

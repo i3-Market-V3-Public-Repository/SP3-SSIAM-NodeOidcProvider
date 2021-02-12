@@ -31,7 +31,7 @@ export async function main (): Promise<void> {
   }
 
   // Intialize jwks
-  await jwks({ amount: 3 })
+  await jwks({ keys: ['RS256', 'PS256', 'ES256', 'EdDSA'] })
 
   // Create a new identity if not provided
   await did()
@@ -57,10 +57,12 @@ export async function main (): Promise<void> {
    * Force proto https if reverse proxy. Header x-forwarded-proto must be setted by the proxy
    * Only use this option on development enviromnent!
    */
-  if (config.revereProxy && !config.isProd) {
+  if (config.reverseProxy && !config.isProd) {
     logger.warn('Setting up x-forwarded-proto header as https. Note that it should be only used in development!')
     app.use((req, res, next) => {
       req.headers['x-forwarded-proto'] = 'https'
+      // req.headers['x-forwarded-for'] = 'oidc.i3m.gold.upc.edu'
+      req.headers.host = 'oidc.i3m.gold.upc.edu'
       next()
     })
   }
@@ -80,18 +82,21 @@ export async function main (): Promise<void> {
   await listenPromise(server, port)
 
   // Connect to ngrok
-  let url = config.host
+  let publicUri = config.publicUri
   if (config.useNgrok) {
-    url = await ngrok.connect({ addr: port })
+    publicUri = await ngrok.connect({ addr: port })
   }
 
   // Log connection information
   logger.info(`Application is listening on port ${config.port}`)
-  logger.info(`OIDC Provider Discovery endpoint at ${url}/oidc/.well-known/openid-configuration`)
-  logger.info(`OpenAPI JSON spec at ${url}/api-spec/openapi.json`)
-  logger.info(`OpenAPI browsable spec at ${url}/api-spec/ui`)
+  logger.info(`OIDC Provider Discovery endpoint at ${publicUri}/oidc/.well-known/openid-configuration`)
+  logger.info(`OpenAPI JSON spec at ${publicUri}/api-spec/openapi.json`)
+  logger.info(`OpenAPI browsable spec at ${publicUri}/api-spec/ui`)
 }
 
 export function onError (reason?: Error): void {
   logger.error(`Error ${reason !== undefined ? reason.message : 'unknown'}`)
+  if (reason !== undefined) {
+    console.log(reason)
+  }
 }

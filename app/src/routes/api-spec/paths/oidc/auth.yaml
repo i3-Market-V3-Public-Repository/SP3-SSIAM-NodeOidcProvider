@@ -74,7 +74,7 @@ components:
       required: true
       schema:
         type: string
-      example: oidcRpACG
+      example: oidcRpAcg_SpaNativeApps
     auth_req_redirect_uri:
       name: redirect_uri
       in: query
@@ -131,7 +131,7 @@ components:
       required: false
       schema:
         type: string
-        default: plain
+        default: S256
         enum:
         - S256
         - plain

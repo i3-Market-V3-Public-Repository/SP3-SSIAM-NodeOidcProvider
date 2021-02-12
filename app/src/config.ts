@@ -19,7 +19,7 @@ function generateRandomStrings (byteLength = 32, amount = 1): string[] {
 }
 
 class Config {
-  protected defaults: {[key: string]: string}
+  protected defaults: {[key: string]: string | undefined }
 
   constructor () {
     const defaultPort = '3000'
@@ -27,13 +27,14 @@ class Config {
     this.defaults = {
       NODE_ENV: 'development',
 
-      OIDC_PROVIDER_ISSUER: 'https://localhost:3000',
-      OIDC_PROVIDER_HOST: `http://localhost:${defaultPort}`,
-      OIDC_PROVIDER_PORT: defaultPort,
-      OIDC_PROVIDER_REVER_PROXY: '0',
-      OIDC_PROVIDER_NGROK: '0',
-      OIDC_PROVIDER_LOCALHOST_RUN: '0',
+      SERVER_PUBLIC_URI: 'http://localhost:3000',
+      HOST_PORT: defaultPort,
 
+      REVER_PROXY: '0',
+      USE_NGROK: '0',
+      USE_LOCALHOST_RUN: '0',
+
+      OIDC_PROVIDER_ISSUER: undefined,
       OIDC_PROVIDER_DB_HOST: 'localhost',
       OIDC_PROVIDER_DB_PORT: '27017',
 
@@ -82,28 +83,36 @@ class Config {
    * @property OpenID Connect Issuer
    */
   get issuer (): string {
-    return this.get('OIDC_PROVIDER_ISSUER')
+    const issuer = this.get('OIDC_PROVIDER_ISSUER')
+    return issuer || this.publicUri // eslint-disable-line
   }
 
   /**
    * @property Server hostname
    */
-  get host (): string {
-    return this.get('OIDC_PROVIDER_HOST')
+  get publicUri (): string {
+    return this.get('SERVER_PUBLIC_URI')
   }
 
   /**
-   * @property Server port
-   */
+    * @property Server port
+    */
   get port (): number {
-    return this.get('OIDC_PROVIDER_PORT', this.fromInteger)
+    return 3000
+  }
+
+  /**
+   * @property Host port
+   */
+  get hostPort (): number {
+    return this.get('HOST_PORT', this.fromInteger)
   }
 
   /**
    * @property Reverse proxy
    */
-  get revereProxy (): boolean {
-    return this.get('OIDC_PROVIDER_REVERSE_PROXY', this.fromBoolean)
+  get reverseProxy (): boolean {
+    return this.get('REVERSE_PROXY', this.fromBoolean)
   }
 
   /**
@@ -136,7 +145,7 @@ class Config {
    * @property It is used to create tunnels so the OIDC server uses a public https domain when testing.
    */
   get useNgrok (): boolean {
-    return this.get('OIDC_PROVIDER_NGROK', this.fromBoolean)
+    return this.get('USE_NGROK', this.fromBoolean)
   }
 
   /**
