@@ -9,7 +9,7 @@ morgan.token<Request>('body', (req, res) => {
   return JSON.stringify(req.body)
 })
 export const loggerMiddleware =
-    morgan(`:date[iso] ${level}: :method :url :status :response-time ms - :res[content-length] :body`)
+    morgan(`:date[iso] ${level}: :method :url :status :response-time ms - :res[content-length] :res[location] :body`)
 
 // Extra information logger
 const consoleTransport = new transports.Console()
