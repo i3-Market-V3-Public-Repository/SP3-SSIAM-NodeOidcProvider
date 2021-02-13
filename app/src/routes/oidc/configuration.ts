@@ -42,7 +42,7 @@ export default async (): Promise<Configuration> => {
       grant_types: [
         'authorization_code'
       ],
-      // id_token_signed_response_alg: 'ES256',
+      id_token_signed_response_alg: 'ES256',
       response_types: [
         'code'
       ],
