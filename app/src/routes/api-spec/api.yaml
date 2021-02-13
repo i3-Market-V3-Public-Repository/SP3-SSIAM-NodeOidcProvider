@@ -11,10 +11,6 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 
-servers:
-  - url: /
-    description: Local testing server
-
 tags:
   - name: OIDC Core
     description: |
