@@ -1,2 +1,3 @@
 #!/bin/sh
-docker-compose -f docker-compose.dev.yaml run --rm --no-deps oidc-provider-app node $@
+SCRIPT_DIR=$(dirname "$0")
+docker-compose -f "${SCRIPT_DIR}/docker-compose.dev.yaml" run --rm --no-deps oidc-provider-app node $@
