@@ -2,5 +2,5 @@
 SCRIPT_DIR=$(dirname "$0")
 export USER_ID=`id -u`
 export GROUP_ID=`id -g`
-docker-compose -f "${SCRIPT_DIR}/docker-compose.dev.yaml" up oidc-provider-app
-docker-compose -f "${SCRIPT_DIR}/docker-compose.dev.yaml" stop oidc-provider-db
+docker-compose -f "${SCRIPT_DIR}/docker-compose.dev.yaml" --env-file "${SCRIPT_DIR}/.env" up oidc-provider-app
+docker-compose -f "${SCRIPT_DIR}/docker-compose.dev.yaml" --env-file "${SCRIPT_DIR}/.env" stop oidc-provider-db

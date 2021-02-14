@@ -10,6 +10,7 @@ services:
       dockerfile: ./Dockerfile.dev
     image: i3market/oidc-provider-dev
     container_name: oidc-provider-app
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
@@ -27,7 +28,7 @@ services:
   oidc-provider-db:
     container_name: oidc-provider-db
     image: mongo:4-bionic
-    restart: always
+    restart: unless-stopped
     networks:
       - oidc-net
     env_file:

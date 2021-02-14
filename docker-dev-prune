@@ -3,4 +3,4 @@ SCRIPT_DIR=$(dirname "$0")
 export USER_ID=`id -u`
 export GROUP_ID=`id -g`
 rm -Rf app/node_modules app/build
-docker-compose -f "${SCRIPT_DIR}/docker-compose.dev.yaml" down --rmi all --remove-orphans --volumes
+docker-compose -f "${SCRIPT_DIR}/docker-compose.dev.yaml" --env-file "${SCRIPT_DIR}/.env" down --rmi all --remove-orphans --volumes
