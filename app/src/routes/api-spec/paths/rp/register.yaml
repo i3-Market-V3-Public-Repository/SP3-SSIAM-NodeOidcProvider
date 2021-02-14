@@ -1,19 +1,8 @@
 openapi: '3.0.3'
 info:
-  description: The API of the i3Market OpenID Connect Provider.
-  version: 0.9.0
+  description: The API of the i3Market OpenID Connect Provider. 
+  version: __VERSION__
   title: i3-market OpenID Connect Provider API
-  contact:
-    name: Fernando Román García, Juan Hernández Serrano
-    email: fernando.roman@upc.edu
-
-  license:
-    name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-
-servers:
-  - url: http://localhost:3000/rp
-    description: 'Development server'
 
 tags:
   - name: OIDC Core
