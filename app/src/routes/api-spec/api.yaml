@@ -17,8 +17,8 @@ tags:
     description: The OpenID Connect Discovery 1.0 specification defines a mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
     externalDocs:
       url: https://openid.net/specs/openid-connect-discovery-1_0.html
-  - name: RP
-    description: Rely Party client managent endpoints, including login, registration, etc
+  - name: Developers
+    description: Developers endpoint. Developers can log in to get a valid initial_access_token for regsitering new clients
 
 paths:
   /oidc/.well-known/openid-configuration:
@@ -33,8 +33,8 @@ paths:
   /oidc/token:
     $ref: "./paths/oidc/token.yaml#/paths/~1token"
 
-  /rp/register:
-    $ref: "./paths/rp/register.yaml#/paths/~1register"
+  /developers/login:
+    $ref: "./paths/developers/login.yaml#/paths/~1login"
 
 components:
   securitySchemes:

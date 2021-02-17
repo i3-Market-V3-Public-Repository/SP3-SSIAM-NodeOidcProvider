@@ -1,5 +1,5 @@
 export { default as oidcEndpoint } from './oidc'
 export { default as interactionEndpoint } from './interaction'
-export { default as rpEndpoint } from './rp'
+export { default as developersEndpoint } from './developers'
 export { default as apiSpecEndpoint } from './api-spec'
 export { default as defaultEndpoint } from './default'

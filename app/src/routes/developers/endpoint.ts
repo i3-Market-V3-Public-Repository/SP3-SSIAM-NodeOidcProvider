@@ -17,7 +17,7 @@ const endpoint: EndpointLoader = async (app, wss) => {
   const passport = await passportPromise()
 
   // Setup app routes
-  appRouter.post('/:clientId', passport.authenticate('basic', { session: false }), controller.newClient)
+  appRouter.get('/login', passport.authenticate('basic', { session: false }), controller.login)
 
   // Handle errors
   appRouter.use(controller.onError)
