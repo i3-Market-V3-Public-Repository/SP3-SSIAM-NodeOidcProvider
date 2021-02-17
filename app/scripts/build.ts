@@ -24,7 +24,7 @@ async function cpFile (src: fs.PathLike, dst: fs.PathLike, flags?: number): Prom
 
 const spawnPromise = async (
   command: string, args: readonly string[], options: SpawnOptions
-): Promise<number> => await new Promise((resolve) => {
+): Promise<number | null> => await new Promise((resolve) => {
   const child = spawn(command, args, options)
   child.on('close', (code) => {
     resolve(code)

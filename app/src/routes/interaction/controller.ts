@@ -183,9 +183,9 @@ export default class InteractionController {
     const clientId = params.client_id
     const sessionData: any = details.session
 
-    assert.equal(name, 'loginAndConsent')
+    assert.strictEqual(name, 'loginAndConsent')
 
-    if (!req.body.code) {
+    if (!req.body.code) { // eslint-disable-line
       logger.error('No code provided')
       throw new Error('No code provided')
     }

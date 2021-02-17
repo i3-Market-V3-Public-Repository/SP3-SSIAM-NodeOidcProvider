@@ -11,7 +11,7 @@ import WebSocketServer from './ws'
 import passportPromise from './passport'
 import { jwks, did } from './security'
 
-import { defaultEndpoint, oidcEndpoint, interactionEndpoint, rpEndpoint, apiSpecEndpoint } from './routes'
+import { defaultEndpoint, oidcEndpoint, interactionEndpoint, developersEndpoint, apiSpecEndpoint } from './routes'
 
 /// ///////
 
@@ -72,7 +72,7 @@ export async function main (): Promise<void> {
   addEndpoint(app, wss, '/api-spec', await apiSpecEndpoint(app, wss))
   addEndpoint(app, wss, '/oidc', await oidcEndpoint(app, wss))
   addEndpoint(app, wss, '/interaction', await interactionEndpoint(app, wss))
-  addEndpoint(app, wss, '/rp', await rpEndpoint(app, wss))
+  addEndpoint(app, wss, '/developers', await developersEndpoint(app, wss))
 
   // Add static files (css and js)
   const publicDir = path.resolve(__dirname, 'public')

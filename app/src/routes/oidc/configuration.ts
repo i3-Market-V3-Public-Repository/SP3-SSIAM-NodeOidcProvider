@@ -39,6 +39,7 @@ export default async (): Promise<Configuration> => {
     },
 
     clientDefaults: {
+      application_type: 'web',
       grant_types: [
         'authorization_code'
       ],
@@ -47,6 +48,8 @@ export default async (): Promise<Configuration> => {
         'code'
       ],
       token_endpoint_auth_method: 'client_secret_jwt'
+      // introspection_endpoint_auth_method: 'client_secret_jwt',  // same as token_endpoint_auth_method by default
+      // revocation_endpoint_auth_method: 'client_secret_jwt',  // same as token_endpoint_auth_method by default
     },
 
     scopes: ['openid', 'vc', 'vc:*', 'vce:*'],
@@ -72,7 +75,15 @@ export default async (): Promise<Configuration> => {
 
       // Disable this to append
       userinfo: { enabled: false },
-      jwtUserinfo: { enabled: false }
+      jwtUserinfo: { enabled: false },
+
+      registration: {
+        enabled: true,
+        // idFactory: [Function: idFactory],
+        initialAccessToken: true
+        // policies: undefined,
+        // secretFactory: [Function: secretFactory]
+      }
     },
 
     cookies: {
