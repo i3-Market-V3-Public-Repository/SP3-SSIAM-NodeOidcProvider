@@ -10,7 +10,8 @@ const clients = [
       ],
       redirect_uris: [
         'http://localhost:3001/oidc/cb', // Custom rp client used for testing
-        'http://localhost:3002/auth/realms/master/broker/oidc/endpoint' // Keycloak rp client for testing
+        'http://localhost:3002/auth/realms/master/broker/oidc/endpoint', // Keycloak rp client for testing
+        'http://localhost:4200/credential'
       ],
       post_logout_redirect_uris: [
         'http://localhost:3001/oidc/logout/cb'
@@ -29,7 +30,8 @@ const clients = [
       ],
       redirect_uris: [
         'http://localhost:3001/oidc/cb', // Custom rp client used for testing
-        'http://localhost:3002/auth/realms/master/broker/oidc/endpoint' // Keycloak rp client for testing
+        'http://localhost:3002/auth/realms/master/broker/oidc/endpoint', // Keycloak rp client for testing
+        'http://localhost:4200/credential'
       ],
       post_logout_redirect_uris: [
         'http://localhost:3001/oidc/logout/cb'

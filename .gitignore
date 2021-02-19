@@ -16,3 +16,5 @@ db/scripts/mongo-init.js
 
 # Environmental settings
 .env
+
+.DS_Store
