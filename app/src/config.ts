@@ -20,6 +20,8 @@ function generateRandomStrings (byteLength = 32, amount = 1): string[] {
 
 class Config {
   protected defaults: {[key: string]: string | undefined }
+  protected _ngrokUri?: string
+  protected _host?: string
 
   constructor () {
     const defaultPort = '3000'
@@ -91,6 +93,9 @@ class Config {
    * @property Server hostname
    */
   get publicUri (): string {
+    if (this.useNgrok) {
+      return this.ngrokUri
+    }
     return this.get('SERVER_PUBLIC_URI')
   }
 
@@ -176,6 +181,34 @@ class Config {
    */
   get whitelist (): string[] {
     return this.get<string[]>('WHITELIST', this.fromImport)
+  }
+
+  /**
+   * @property Ngrok uri
+   */
+  set ngrokUri (v: string) {
+    this._ngrokUri = v
+  }
+
+  get ngrokUri (): string {
+    if (this._ngrokUri === undefined) {
+      throw new Error('Ngrok endpoint not initialized yet')
+    }
+    return this._ngrokUri
+  }
+
+  /**
+   * @property Host
+   */
+  set host (v: string) {
+    this._host = v
+  }
+
+  get host (): string {
+    if (this._host === undefined) {
+      throw new Error('Host not initialized yet')
+    }
+    return this._host
   }
 }
 

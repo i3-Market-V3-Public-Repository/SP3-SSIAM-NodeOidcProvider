@@ -12,6 +12,7 @@ import passportPromise from './passport'
 import { jwks, did } from './security'
 
 import { defaultEndpoint, oidcEndpoint, interactionEndpoint, developersEndpoint, apiSpecEndpoint, credentialEndpoint, didEndpoint } from './routes'
+
 /// ///////
 
 async function listenPromise (server: http.Server, port: number): Promise<void> {
@@ -28,6 +29,22 @@ export async function main (): Promise<void> {
   if (Adapter.connect != null) {
     await Adapter.connect()
   }
+
+  // Connect to ngrok
+  const port = config.port
+  if (config.useNgrok) {
+    const ngrokUri = await ngrok.connect({ addr: port })
+    config.ngrokUri = ngrokUri
+  }
+
+  // Initialise server comunications variables
+  const publicUri = config.publicUri
+  const hostRegex = /^[^:]+:\/\/([^:/]+).{0,}$/
+  const match = hostRegex.exec(publicUri)
+  if (match === null || match.length < 2) {
+    throw new Error('Cannot retrieve host from public uri')
+  }
+  config.host = match[1].toString()
 
   // Intialize jwks
   await jwks({ keys: ['RS256', 'PS256', 'ES256', 'EdDSA'] })
@@ -61,7 +78,7 @@ export async function main (): Promise<void> {
     app.use((req, res, next) => {
       req.headers['x-forwarded-proto'] = 'https'
       // req.headers['x-forwarded-for'] = 'oidc.i3m.gold.upc.edu'
-      req.headers.host = 'oidc.i3m.gold.upc.edu'
+      req.headers.host = config.host
       next()
     })
   }
@@ -80,14 +97,7 @@ export async function main (): Promise<void> {
   app.use('/', express.static(publicDir))
 
   // Listen
-  const port = config.port
   await listenPromise(server, port)
-
-  // Connect to ngrok
-  let publicUri = config.publicUri
-  if (config.useNgrok) {
-    publicUri = await ngrok.connect({ addr: port })
-  }
 
   // Log connection information
   logger.info(`Application is listening on port ${config.port}`)
