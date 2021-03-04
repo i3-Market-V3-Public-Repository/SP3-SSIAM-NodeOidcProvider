@@ -2,6 +2,7 @@ import * as path from 'path'
 import express from 'express'
 import * as http from 'http'
 import * as ngrok from 'ngrok'
+import { URL } from 'url'
 
 import config from './config'
 import logger, { loggerMiddleware } from './logger'
@@ -39,12 +40,8 @@ export async function main (): Promise<void> {
 
   // Initialise server comunications variables
   const publicUri = config.publicUri
-  const hostRegex = /^[^:]+:\/\/([^:/]+).{0,}$/
-  const match = hostRegex.exec(publicUri)
-  if (match === null || match.length < 2) {
-    throw new Error('Cannot retrieve host from public uri')
-  }
-  config.host = match[1].toString()
+  const url = new URL(publicUri)
+  config.host = url.host
 
   // Intialize jwks
   await jwks({ keys: ['RS256', 'PS256', 'ES256', 'EdDSA'] })
