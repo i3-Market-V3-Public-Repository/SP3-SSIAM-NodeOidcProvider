@@ -10,14 +10,11 @@ import config from '@i3-market/config'
 import { SocketHandler } from '@i3-market/ws/utils'
 import WebSocketServer from '../../ws'
 
-const transports = require('uport-transports').transport
-const message = require('uport-transports').message.util
+import { message, transport } from 'uport-transports'
 
-
-
-//import { EthrCredentialRevoker } from 'ethr-status-registry'
-//import { sign } from 'ethjs-signer'
-//const didJWT = require('did-jwt')
+// import { EthrCredentialRevoker } from 'ethr-status-registry'
+// import { sign } from 'ethjs-signer'
+// const didJWT = require('did-jwt')
 
 interface SocketParams {
   uid: string
@@ -28,13 +25,12 @@ interface SocketData {
 }
 
 export default class InteractionController {
-
   protected credentials: Credentials
 
   constructor (protected provider: Provider, protected wss: WebSocketServer) { }
 
-  public async initialize () {
-    const providerConfig = { rpcUrl: 'https://rinkeby.infura.io/ethr-did' }
+  public async initialize (): Promise<void> {
+    const providerConfig = { rpcUrl: config.rpcUrl }
     const identity = await config.identityPromise
     this.credentials = new Credentials({
       did: identity.did,
@@ -44,9 +40,9 @@ export default class InteractionController {
   }
 
   // WebSocket Methods
-  socketConnect: SocketHandler<SocketParams> = async (socket, req) => {  
-    console.log('socket connect')  
-    let socketid = req.params.uid.split('/');
+  socketConnect: SocketHandler<SocketParams> = async (socket, req) => {
+    console.log('socket connect')
+    const socketid = req.params.uid.split('/')
     console.log(socketid[0])
     socket.tag(socketid[0])
   }
@@ -61,59 +57,54 @@ export default class InteractionController {
     logger.debug('Close socket')
   }
 
-  
-
-
   /**
    * GET /did/{callbackurl} - get did by login process and callback
-   * 
+   *
    */
   authenticate: RequestHandler = async (req, res, next) => {
-
-    //TODO: inizializzare la socket 
+    // TODO: inizializzare la socket
     const uid = '123uidtest'
 
-    const callbackUrl = `https://${req.get('host')}/did/callback/${uid}/${req.params.callbackurl}`
+    const callbackUrl = `${config.publicUri}/did/callback/${uid}/${req.params.callbackurl}`
     const reqToken = await this.credentials.createDisclosureRequest({
       notifications: true,
-      callbackUrl        
+      callbackUrl
     })
-    
-    //logger.debug(reqToken)
-    const query = message.messageToURI(reqToken)
-    const uri = message.paramsToQueryString(query, { callback_type: 'post' })
-    const qr = transports.ui.getImageDataURI(uri)
+
+    // logger.debug(reqToken)
+    const query = message.util.messageToURI(reqToken)
+    const uri = message.util.paramsToQueryString(query, { callback_type: 'post' })
+    const qr = transport.ui.getImageDataURI(uri)
 
     logger.debug('Authenticate interaction received')
     logger.debug(callbackUrl)
     const title: string = 'Authenticate'
     return res.render('authenticate', { qr, title })
-
   }
 
   /**
    * Authenticate api callback
    */
   authenticateCallback: RequestHandler = async (req, res, next) => {
-    logger.debug('Authenticate callback')    
-    const { error: err, access_token: accessToken } = req.body   
+    logger.debug('Authenticate callback')
+    const { error: err, access_token: accessToken } = req.body
     const { callbackurl } = req.params
 
-    if (err) { 
-      return res.status(403).send(err) 
+    if (err !== undefined) {
+      return res.status(403).send(err)
     }
 
-    const credentials = await this.credentials.authenticateDisclosureResponse(accessToken) 
+    const credentials = await this.credentials.authenticateDisclosureResponse(accessToken)
 
     console.log(credentials)
-    
-    let socketid = callbackurl.split('/')
+
+    const socketid = callbackurl.split('/')
     const socket = this.wss.get(socketid[0])
     console.log('socketid: ', socketid[0])
-    if (!socket) {
+    if (socket === undefined) {
       logger.debug('The client was disconnected before sending the did...')
-    } else {      
-      socket.send(credentials.did + ','+ callbackurl)
+    } else {
+      socket.send(credentials.did + ',' + callbackurl)
       socket.close()
     }
   }

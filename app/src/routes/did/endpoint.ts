@@ -28,7 +28,7 @@ const endpoint: EndpointLoader = async (app, wss) => {
     // you'll probably want to use a full blown render engine capable of layouts
     res.render = (view, locals) => {
       app.render(view, locals, (err, html) => {
-        if (err) throw err
+        if (err !== null) throw err
         orig.call(res, '_layout_authenticate', {
           ...locals,
           body: html
@@ -38,16 +38,15 @@ const endpoint: EndpointLoader = async (app, wss) => {
     next()
   })
 
-
   // Setup app routes
   appRouter.get('/:callbackurl(*)', nextIfError(controller.authenticate)) // se non authenticato
   appRouter.post('/callback/:uid/:callbackurl(*)', body, nextIfError(controller.authenticateCallback))
-  
+
   // Setup ws routes
   wsRouter.connect('/:uid(.*)/socket', controller.socketConnect)
   wsRouter.message('/:uid(.*)/socket', controller.socketMessage)
   wsRouter.close('/:uid(.*)/socket', controller.socketClose)
-  
+
   // Handle errors
   // appRouter.use(controller.onError)
 

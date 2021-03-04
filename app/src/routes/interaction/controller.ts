@@ -21,7 +21,7 @@ import { disclosureArgs, fetchClaims, UportClaims } from './uport-scopes'
 
 const { SessionNotFound } = oidcErrors
 const keys = new Set()
-const debug = (obj) => querystring.stringify(Object.entries(obj).reduce((acc, [key, value]) => {
+const debug = (obj): string => querystring.stringify(Object.entries(obj).reduce((acc, [key, value]) => {
   keys.add(key)
   if (isEmpty(value)) return acc
   acc[key] = inspect(value, { depth: null })
@@ -73,7 +73,7 @@ export default class InteractionController {
     const { error: err, access_token: accessToken } = req.body
     const { uid } = req.params
 
-    if (err) {
+    if (err !== undefined) {
       if (typeof err === 'string') {
         logger.error(`Selective disclosure error: ${err}`)
       } else {
@@ -104,7 +104,7 @@ export default class InteractionController {
 
     // Close the socket once the access token is sent
     socket.send(encryptedAccessToken, (err) => {
-      if (!err) {
+      if (err !== undefined) {
         socket.close()
         return
       }
