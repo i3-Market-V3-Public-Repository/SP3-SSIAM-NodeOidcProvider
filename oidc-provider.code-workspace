@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "./app"
+		}
+	],
+	"settings": {
+		"standard.engine": "ts-standard",
+		"standard.usePackageJson": true
+	}
+}
