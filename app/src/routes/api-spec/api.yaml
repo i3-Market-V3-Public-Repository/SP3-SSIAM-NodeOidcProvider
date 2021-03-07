@@ -19,6 +19,9 @@ tags:
       url: https://openid.net/specs/openid-connect-discovery-1_0.html
   - name: Developers
     description: Developers endpoint. Developers can log in to get a valid initial_access_token for regsitering new clients
+  - name: Credential
+    description: Testing endpoint where to obtain consumer/provider credentials
+
 
 paths:
   /oidc/.well-known/openid-configuration:
@@ -35,6 +38,9 @@ paths:
 
   /developers/login:
     $ref: "./paths/developers/login.yaml#/paths/~1login"
+
+  /credential/{credentialName}/{did}:
+    $ref: "./paths/credential.yaml#/paths/~1%7BcredentialName%7D~1%7Bdid%7D"
 
 components:
   securitySchemes:
