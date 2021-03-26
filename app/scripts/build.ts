@@ -7,6 +7,7 @@ import { spawn, SpawnOptions } from 'child_process'
 
 // import * as glob from "glob"
 import rimraf from 'rimraf'
+import glob from 'glob'
 
 const rootDir = path.resolve(__dirname, '..')
 const configPath = path.join(rootDir, 'tsconfig.json')
@@ -21,7 +22,7 @@ const dst = tsConfig.options.outDir
 
 // Global variables
 const cpPromise = promisify(fs.copyFile)
-// const globPromise = promisify(glob)
+const globPromise = promisify(glob)
 const rmPromise = promisify(rimraf)
 
 async function cpFile (src: fs.PathLike, dst: fs.PathLike, flags?: number): Promise<void> {
@@ -62,8 +63,9 @@ const fetchCopyFiles = async (): Promise<string[]> => {
   const files: string[] = []
 
   return files.concat(
-    ['package.json', 'package-lock.json']
-    // await globPromise("src/**/*.{json,yaml,yml}") // Copy all yaml files within src
+    await globPromise("**/*.ejs", {
+       cwd: 'src'
+    }) // Copy all ejs files within src
   )
 }
 
@@ -72,7 +74,7 @@ const copy = async (): Promise<void> => {
   for (const copyFile of copyFiles) {
     console.log(`Copying ${copyFile}...`)
     await cpFile(
-      path.resolve(rootDir, copyFile),
+      path.resolve(rootDir, 'src', copyFile),
       path.resolve(dst, copyFile)
     )
   }
