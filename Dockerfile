@@ -1,15 +1,19 @@
-FROM node:14
-
-## Mongo default configuration
-ENV MONGO_HOST localhost
-ENV MONGO_INITDB_ROOT_USERNAME oidp
-ENV MONGO_INITDB_ROOT_PASSWORD secret
-ENV MONGO_INITDB_DATABASE oidp
+FROM node:14 AS builder
 
 WORKDIR /app
-COPY ./app/build /app/
+COPY ./app /app
+
+RUN npm i && npm run build
+
+FROM node:14
+COPY --from=builder /app/dist /app/dist
+COPY ./app/package-lock.json /app/
+COPY ./app/package.json /app/
+COPY ./app/misc/whitelist.js /app/misc/whitelist.js
+
+WORKDIR /app
 RUN npm i --only=prod
 
 EXPOSE 3000
 
-CMD ["node", "src/index.js"]
+CMD ["npm", "run", "run:prod"]
