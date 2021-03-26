@@ -1,73 +1,40 @@
-version: '3.4'
+version: '3.6'
 
 services:
-  db:
-    image: mongo
-    container_name: oidc-db
-    working_dir: /data/scripts
-    volumes:
-      - "$PWD/volumes/mongo:/data/db"
-      - "$PWD/db/scripts:/data/scripts"
-    env_file: $PWD/app/misc/dev.env
+  oidc-provider-app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: i3market/oidc-provider-app
+    container_name: oidc-provider-app
+    restart: unless-stopped
+    env_file:
+      - .env
     ports:
-        - 27017:27017
-
-  db-initialize:
-    image: mongo
-    container_name: oidc-db-initializer
-    working_dir: /data/scripts
+      - ${HOST_BIND_IP-127.0.0.1}:$HOST_PORT:3000
+    networks:
+      - oidc-net
     volumes:
-      - "$PWD/db/scripts:/data/scripts"
-      - "$PWD/app/misc/initial-state.js:/data/scripts/initial-state.js"
-    env_file: $PWD/app/misc/dev.env
-    environment:
-      - WAIT_HOSTS=db:27017
-      - WAIT_HOSTS_TIMEOUT=300
-      - WAIT_SLEEP_INTERVAL=1
-      - WAIT_HOST_CONNECT_TIMEOUT=30
-    links:
-      - db
-    entrypoint: ./initialize.sh
-
-  # resolver:
-  #   image: dvdarias/docker-hoster
-  #   volumes:
-  #     - /var/run/docker.sock:/tmp/docker.sock
-  #     - /etc/hosts:/tmp/hosts
-
-  oidc-provider:
-    image: node:14
-    container_name: oidc-provider
-    ports:
-      - 3000:3000
-      - 127.0.0.1:9229:9229
-    links:
-      - db
-      - db-initialize
-    working_dir: /usr/src/app
-    environment:
-      - OIDC_PROVIDER_REVERSE_PROXY=true
-    volumes:
-      - "$PWD/app:/usr/src/app"
-      - "$PWD/volumes/node_modules:/usr/src/app/node_modules"
-      - "$PWD/volumes/ssh:/root/.ssh"
-    command: "./app/scripts/start.sh"
-
-  oidc-rp:
-    image: oidc-rp
+      - oidc-misc:/app/misc
     depends_on:
-      - oidc-provider
+      - oidc-provider-db
+  oidc-provider-db:
+    container_name: oidc-provider-db
+    image: mongo:4-bionic
+    restart: unless-stopped
+    networks:
+      - oidc-net
+    env_file:
+      - .env
     ports:
-      - 3001:7080
-    env_file: $PWD/app/misc/dev.env
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:11.0.2
-    container_name: keycloak
-    depends_on:
-      - oidc-provider
-    environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
-    ports:
-      - 3002:8080
+      - 27017:27017
+    volumes:
+      - oidc-mongo:/data/db
+      - ./db/scripts:/data/scripts
+      - ./db/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    command: --quiet --setParameter logLevel=0
+networks:
+  oidc-net:
+volumes:
+  oidc-mongo:
+  oidc-misc:

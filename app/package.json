@@ -6,13 +6,14 @@
   "scripts": {
     "docs": "",
     "run:dev": "nodemon -r ts-node/register -r dotenv/config --inspect=0.0.0.0:9229 ./src",
+    "run:prod": "node ./dist",
     "prebuild": "npm run oas",
     "build": "ts-node scripts/build.ts",
-    "start": "npm run run:dev",
     "test": "ts-node -r dotenv/config -- ./test",
     "lint": "ts-standard",
     "identity": "ts-node scripts/new-identity.ts",
     "prestart": "npm run build",
+    "start": "npm run run:dev",
     "oas": "swagger-cli bundle --outfile ./src/routes/api-spec/api.json ./src/routes/api-spec/api.yaml",
     "clean": "ts-node scripts/clean.ts"
   },
@@ -38,7 +39,6 @@
     "@types/winston": "^2.4.4",
     "@types/ws": "^7.4.0",
     "glob": "^7.1.6",
-    "node-alias": "^1.0.4",
     "nodemon": "^2.0.7",
     "openapi-types": "^7.2.3",
     "rimraf": "^3.0.2",
@@ -78,8 +78,5 @@
       "/build/*",
       "/db/*"
     ]
-  },
-  "_moduleAliases": {
-    "@i3-market": "./src"
   }
 }

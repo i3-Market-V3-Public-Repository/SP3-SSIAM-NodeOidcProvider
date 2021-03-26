@@ -1,11 +1,23 @@
 // Dependencies
 import * as fs from 'fs'
 import * as path from 'path'
+import ts from 'typescript'
 import { promisify } from 'util'
 import { spawn, SpawnOptions } from 'child_process'
 
 // import * as glob from "glob"
 import rimraf from 'rimraf'
+
+const rootDir = path.resolve(__dirname, '..')
+const configPath = path.join(rootDir, 'tsconfig.json')
+
+const configFile = ts.readJsonConfigFile(configPath, (path) => fs.readFileSync(path, { encoding: 'utf-8'}))
+const tsConfig = ts.parseJsonSourceFileConfigFileContent(configFile, ts.sys, path.dirname(configPath))
+
+if (tsConfig.options.outDir === undefined) {
+  throw new Error('Cannot load outDir')
+}
+const dst = tsConfig.options.outDir
 
 // Global variables
 const cpPromise = promisify(fs.copyFile)
@@ -31,8 +43,6 @@ const spawnPromise = async (
   })
 })
 
-const rootDir = path.resolve(__dirname, '..')
-const dst = path.resolve(rootDir, 'build', 'src')
 // const src = path.resolve(rootDir, "src")
 
 // Methods

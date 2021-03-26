@@ -17,7 +17,7 @@
         // "alwaysStrict": true, /* Parse in strict mode and emit "use strict" for each source file. */
         "esModuleInterop": true,
         "noUnusedLocals": true,
-        "outDir": "build/src",
+        "outDir": "dist",
         "resolveJsonModule": true,
         "baseUrl": ".",
         "paths": {
