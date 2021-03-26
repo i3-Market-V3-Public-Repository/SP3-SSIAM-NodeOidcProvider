@@ -1,7 +1,6 @@
 import * as path from 'path'
 import express from 'express'
 import * as http from 'http'
-import * as ngrok from 'ngrok'
 import { URL } from 'url'
 
 import config from './config'
@@ -30,10 +29,14 @@ export async function main (): Promise<void> {
   if (Adapter.connect != null) {
     await Adapter.connect()
   }
+  if (config.isProd) {
+    logger.info('Using production environment')
+  }
 
   // Connect to ngrok
   const port = config.port
   if (config.useNgrok) {
+    const ngrok = await import('ngrok')
     const ngrokUri = await ngrok.connect({ addr: port })
     config.ngrokUri = ngrokUri
   }
