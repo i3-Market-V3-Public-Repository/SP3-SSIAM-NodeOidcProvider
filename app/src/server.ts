@@ -25,16 +25,21 @@ async function listenPromise (server: http.Server, port: number): Promise<void> 
  * Main function: the application entrypoint!
  */
 export async function main (): Promise<void> {
-  // Connect adapter to database if needed
-  if (Adapter.connect != null) {
-    await Adapter.connect()
-  }
   if (config.isProd) {
     logger.info('Using production environment')
   }
 
-  // Connect to ngrok
+  // Connect adapter to database if needed
+  if (Adapter.connect != null) {
+    await Adapter.connect()
+  }
+
   const port = config.port
+
+  // Connect to ngrok
+  if (config.isProd && config.useNgrok) {
+    throw new Error('You can\'t use NGROK in production. You may want to switch it off in your .env file')
+  }
   if (config.useNgrok) {
     const ngrok = await import('ngrok')
     const ngrokUri = await ngrok.connect({ addr: port })
