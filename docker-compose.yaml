@@ -2,10 +2,7 @@ version: '3.6'
 
 services:
   oidc-provider-app:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    image: i3market/oidc-provider-app
+    image: registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider
     container_name: oidc-provider-app
     restart: unless-stopped
     env_file:
