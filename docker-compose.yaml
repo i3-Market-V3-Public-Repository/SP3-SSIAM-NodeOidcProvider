@@ -10,10 +10,9 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    ports:
-      - ${HOST_BIND_IP-127.0.0.1}:$HOST_PORT:3000
     networks:
       - oidc-net
+      - reverse-proxy
     volumes:
       - oidc-misc:/app/misc
     depends_on:
@@ -35,6 +34,8 @@ services:
     command: --quiet --setParameter logLevel=0
 networks:
   oidc-net:
+  reverse-proxy:
+    external: true
 volumes:
   oidc-mongo:
   oidc-misc:
