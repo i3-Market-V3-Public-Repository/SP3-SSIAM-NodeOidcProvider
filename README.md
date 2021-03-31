@@ -72,7 +72,7 @@ You can build the production docker image using the helpers provided in this rep
 ./docker-prod-push
 ```
 
-The last script `docker-prod` manages the deployment. You can use it to extract the files required in the production environment. To do so execute the following commands:
+The script `docker-prod` manages the deployment. You can use it to extract the files required in the production environment. To do so execute the following commands:
 
 ```console
 # Prepare a folder to work
@@ -95,7 +95,7 @@ docker-compose up -d
 docker-compose down
 docker-compose up -d
 
-# Finally configure a reverse proxy. We sudgest ussing the one provided in:
+# Finally configure a reverse proxy. We suggest using the one provided in:
 # https://gitlab.com/i3-market/code/wp3/nginx-reverse-proxy
 ```
 
