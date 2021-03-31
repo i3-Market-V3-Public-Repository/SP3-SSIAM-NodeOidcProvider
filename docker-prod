@@ -93,7 +93,7 @@ execute () {
   COMMAND=$@
   if [ -z $1 ]; then
     print_message "Using default command (bash)"
-    print_message "You can use the command 'usage [env/docker-compose]' to get deployment information"
+    print_message "You can use the command 'template [env/docker-compose]' to get deployment information"
     print_message "You may also want to init the default volumes using 'init-volumes UID:GID'"
     COMMAND="bash"
   else

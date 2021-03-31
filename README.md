@@ -62,16 +62,41 @@ v14.15.1
 
 ## Production
 
-To build the typescript and prepare copy all the needed files into the build folder execute the command:
+You can build the production docker image using the helpers provided in this repository:
 
 ```console
-npm run build
+# Build the image to work locally
+./docker-prod-build
+
+# Build and push the image into the gitlab registry
+./docker-prod-push
 ```
 
-To build a docker image use the command:
+The last script `docker-prod` manages the deployment. You can use it to extract the files required in the production environment. To do so execute the following commands:
 
 ```console
-docker build . -t i3-market-oidc-provider
+# Prepare a folder to work
+mkdir oidc-provider
+# Place the 'docker-prod' file inside oidc-provider
+cd oidc-provider
+
+# Pull the docker image and prepare the volumes
+./docker-prod -p init-volumes $(id -u):$(id -g)
+
+# Create a docker-compose.yaml and .env using the template.
+# Remember to configure SERVER_PUBLIC_URI, OIDC_PROVIDER_DB_PASSWORD and MONGO_INITDB_ROOT_PASSWORD in the .env file
+./docker-prod -o docker-compose.yaml template docker-compose
+./docker-prod -o .env template env
+
+# Start docker services
+docker-compose up -d
+
+# We have an issue on the first start. If you get an error just restart docker services
+docker-compose down
+docker-compose up -d
+
+# Finally configure a reverse proxy. We sudgest ussing the one provided in:
+# https://gitlab.com/i3-market/code/wp3/nginx-reverse-proxy
 ```
 
 ### Configuration

@@ -24,7 +24,7 @@ function createFormat (): Logger['format'] {
   return format.combine(...formats)
 }
 export default createLogger({
-  level: 'debug',
+  level: config.isProd ? 'info' : 'debug',
   transports: [consoleTransport],
   format: createFormat()
 })

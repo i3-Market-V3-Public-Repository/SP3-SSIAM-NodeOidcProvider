@@ -26,8 +26,8 @@ services:
       - 27017:27017
     volumes:
       - oidc-mongo:/data/db
-      - ./volumes/db/scripts:/data/scripts:ro
-      - ./volumes/db/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./volumes/scripts:/data/scripts:ro
+      - ./volumes/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     command: --quiet --setParameter logLevel=0
 networks:
   oidc-net:
