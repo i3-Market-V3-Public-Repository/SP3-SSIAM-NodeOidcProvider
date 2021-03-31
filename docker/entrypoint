@@ -1,0 +1,10 @@
+#!/bin/bash
+echo "--------------------------------------------------------------------------------------------------"
+echo "You can use the command usage to learn more information about deployment and enviromental variables"
+echo "docker run <this-image> usage"
+echo "--------------------------------------------------------------------------------------------------"
+echo
+
+pushd /app > /dev/null
+    npm run run:prod
+popd > /dev/null

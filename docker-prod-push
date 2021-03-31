@@ -1,0 +1,4 @@
+#!/bin/sh
+SCRIPT_DIR=$(dirname "$0")
+${SCRIPT_DIR}/docker-prod-build
+docker push registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider

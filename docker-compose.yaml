@@ -11,7 +11,7 @@ services:
       - oidc-net
       - reverse-proxy
     volumes:
-      - oidc-misc:/app/misc
+      - ./volumes/misc:/app/misc
     depends_on:
       - oidc-provider-db
   oidc-provider-db:
@@ -26,8 +26,8 @@ services:
       - 27017:27017
     volumes:
       - oidc-mongo:/data/db
-      - ./db/scripts:/data/scripts
-      - ./db/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./volumes/db/scripts:/data/scripts:ro
+      - ./volumes/db/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     command: --quiet --setParameter logLevel=0
 networks:
   oidc-net:
@@ -35,4 +35,3 @@ networks:
     external: true
 volumes:
   oidc-mongo:
-  oidc-misc:

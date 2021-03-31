@@ -1,0 +1,4 @@
+#!/bin/sh
+SCRIPT_DIR=$(dirname "$0")
+docker build -t i3market/oidc-provider-app ${SCRIPT_DIR}
+docker tag i3market/oidc-provider-app registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider

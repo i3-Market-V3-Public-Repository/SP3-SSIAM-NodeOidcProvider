@@ -1,0 +1,25 @@
+#!/bin/bash
+help () {
+  echo "error: incorrect subcommand"
+  echo "usage [env/docker-compose]"
+}
+
+env () {
+  cat /app/template.env
+}
+
+docker-compose () {
+  echo "# docker-compose.yaml template"
+  cat /app/docker-compose.yaml
+}
+
+
+if [ -z $1 ]; then
+  help $@
+elif [ $1 = "env" ]; then
+  env $@
+elif [ $1 = "docker-compose" ]; then
+  docker-compose $@
+else
+  help $@
+fi

@@ -1,0 +1,125 @@
+#!/bin/bash
+
+check_argument () {
+  if [ -z $2 ]; then
+    echo "No value specified for argument $1"
+    exit
+  fi
+}
+
+help () {
+  echo "usage: $0 -q -p -o output.txt <some command>"
+  echo "Arguments:"
+  echo "  -q|--quiet            Quiet, reduce logs"
+  echo "  -p|--pull             Pull last version"
+  echo "  -o|--output <output>  Outputs the stdout of the command to <output>"
+  echo "  -h|--help             Print this message"
+  echo
+  echo "Positional arguments:"
+  echo "  <some command>        Command to be executed in the image"
+  exit
+}
+
+parse_arguments () {
+  POSITIONAL=()
+  PULL=0
+  QUIET=0
+  HELP=0
+  while [[ $# -gt 0 ]]
+  do
+  key="$1"
+
+  if [ -z $POSITIONAL ]; then
+    case $key in
+        -q|--quiet)
+        QUIET=1
+        shift # past argument
+        ;;
+        -p|--pull)
+        PULL=1
+        shift # past argument
+        ;;
+        -h|--help)
+        HELP=1
+        shift # past argument
+        ;;
+        -o|--output)
+        check_argument $@
+        OUTPUT=$2
+        shift # past argument
+        shift # past value
+        ;;
+        *)    # unknown option
+        POSITIONAL+=("$1") # save it in an array for later
+        shift # past argument
+        ;;
+    esac
+  else
+    # After the first positional argument, all are positional
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+  fi
+  done
+  set -- "${POSITIONAL[@]}" # restore positional parameters
+}
+
+print_message () {
+  if [ $QUIET = 0 ]; then
+    echo $@
+  fi
+}
+
+authenticate () {
+  print_message "----- Authentication -----"
+  docker login registry.gitlab.com
+  if [ $? != 0 ]; then
+    echo "Cannot authenticate"
+    exit
+  fi
+  print_message "----------"
+  print_message
+}
+
+pull () {
+  print_message "----- Pull last version -----"
+  docker pull registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider
+  docker tag registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider i3market/oidc-provider-app
+  print_message "----------"
+  print_message
+}
+
+execute () {
+  print_message "----- Execute -----"
+  COMMAND=$@
+  if [ -z $1 ]; then
+    print_message "Using default command (bash)"
+    print_message "You can use the command 'usage [env/docker-compose]' to get deployment information"
+    print_message "You may also want to init the default volumes using 'init-volumes UID:GID'"
+    COMMAND="bash"
+  else
+    print_message "Execute command: $COMMAND"
+  fi
+
+  FULL_COMMAND="docker run --rm --name oidc-provider-installer -v $(pwd)/volumes:/volumes -it i3market/oidc-provider-app $COMMAND"
+
+  if [ -z $OUTPUT ]; then
+    $FULL_COMMAND
+  else
+    $FULL_COMMAND 1> $OUTPUT
+  fi
+}
+
+main () {
+  parse_arguments $@
+  if [ $HELP = 1 ]; then
+    help
+  fi
+
+  if [ $PULL = 1 ]; then
+    authenticate
+    pull
+  fi
+  execute ${POSITIONAL[@]}
+}
+
+main $@
