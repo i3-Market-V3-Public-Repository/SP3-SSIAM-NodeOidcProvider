@@ -25,6 +25,12 @@ module.exports = whitelist
       `)
       return false
     }
-    return whitelist.includes(did)
+    logger.info(`whitelist ${whitelist.join(', ')}`)
+    if (whitelist.includes(did)) {
+      return true
+    } else {
+      logger.warn(`The did '${did}' is untrusted!`)
+      return false
+    }
   }
 }

@@ -1,11 +1,11 @@
 #!/bin/bash
 help () {
   echo "error: incorrect subcommand"
-  echo "usage [env/docker-compose]"
+  echo "template [env/docker-compose]"
 }
 
 env () {
-  cat /app/template.env
+  cat /app/production.env
 }
 
 docker-compose () {

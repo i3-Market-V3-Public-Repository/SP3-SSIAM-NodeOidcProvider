@@ -113,7 +113,7 @@ export default class InteractionController {
       console.trace(err)
     })
 
-    res.send(200)
+    res.status(200)
   }
 
   handleInteraction: RequestHandler = async (req, res, next) => {
