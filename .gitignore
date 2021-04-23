@@ -1,6 +1,7 @@
 
 app/node_modules
 app/dist
+environments
 
 # Ignore development configuration files
 app/misc/identity.json

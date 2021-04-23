@@ -17,10 +17,10 @@ tags:
     description: The OpenID Connect Discovery 1.0 specification defines a mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
     externalDocs:
       url: https://openid.net/specs/openid-connect-discovery-1_0.html
-  - name: Developers
-    description: Developers endpoint. Developers can log in to get a valid initial_access_token for regsitering new clients
-  - name: Credential
-    description: Testing endpoint where to obtain consumer/provider credentials
+  # - name: Developers
+  #   description: Developers endpoint. Developers can log in to get a valid initial_access_token for regsitering new clients
+  # - name: Credential
+  #   description: Testing endpoint where to obtain consumer/provider credentials
 
 
 paths:
@@ -36,11 +36,11 @@ paths:
   /oidc/token:
     $ref: "./paths/oidc/token.yaml#/paths/~1token"
 
-  /developers/login:
-    $ref: "./paths/developers/login.yaml#/paths/~1login"
+  # /developers/login:
+  #   $ref: "./paths/developers/login.yaml#/paths/~1login"
 
-  /credential/{credentialName}/{did}:
-    $ref: "./paths/credential.yaml#/paths/~1%7BcredentialName%7D~1%7Bdid%7D"
+  # /credential/{credentialName}/{did}:
+  #   $ref: "./paths/credential.yaml#/paths/~1%7BcredentialName%7D~1%7Bdid%7D"
 
 components:
   securitySchemes:
