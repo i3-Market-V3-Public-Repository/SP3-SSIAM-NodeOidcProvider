@@ -5,19 +5,22 @@ import { inspect } from 'util'
 import { isEmpty } from 'lodash'
 import Provider, { errors as oidcErrors, InteractionResults } from 'oidc-provider'
 import { Credentials, SimpleSigner } from 'uport-credentials'
-import { message, transport } from 'uport-transports'
+// import { message, transport } from 'uport-transports'
 import { getResolver } from 'ethr-did-resolver'
 import { Resolver } from 'did-resolver'
-// import { decodeJWT } from "did-jwt"
+import { decodeJWT } from "did-jwt"
 
 import logger from '@i3-market/logger'
 import config from '@i3-market/config'
-import { retry } from '@i3-market/util'
+// import { retry } from '@i3-market/util'
 import { AccountNotFount, IncorrectPassword } from '@i3-market/error'
 import WebSocketServer, { SocketHandler } from '@i3-market/ws'
 import { random, Cipher } from '@i3-market/security'
 
-import { disclosureArgs, fetchClaims, UportClaims } from './uport-scopes'
+import { disclosureArgs, /*fetchClaims, UportClaims*/ } from './uport-scopes'
+
+import { agent } from './agent'
+
 
 const { SessionNotFound } = oidcErrors
 const keys = new Set()
@@ -33,7 +36,7 @@ const debug = (obj): string => querystring.stringify(Object.entries(obj).reduce(
 interface Params { [key: string]: string}
 interface InteractionParams extends Params { uid: string }
 
-interface SelectiveDisclousureResponseBody { error: any, access_token: string }
+// interface SelectiveDisclousureResponseBody { error: any, access_token: string }
 interface LoginBody { code?: string }
 
 export default class InteractionController {
@@ -67,55 +70,6 @@ export default class InteractionController {
   }
 
   // App Methods
-
-  // Callback handler where the selective disclosure is resolved
-  callback: RequestHandler<InteractionParams, any, SelectiveDisclousureResponseBody> = async (req, res, next) => {
-    const { error: err, access_token: accessToken } = req.body
-    const { uid } = req.params
-
-    if (err !== undefined) {
-      if (typeof err === 'string') {
-        logger.error(`Selective disclosure error: ${err}`)
-      } else {
-        logger.error('Unknown selective disclosure error')
-      }
-      return res.status(403).send(err)
-    }
-
-    logger.debug(`Received the access token for the interaction "${uid}"`)
-
-    //
-    const socket = await retry(() => this.wss.get(uid), {
-      interval: 500, // ms
-      tries: 20 // 500 ms * 20 = 10s
-    }).catch((reason) => {
-      res.status(400).send(reason.message)
-      logger.error('Cannot connect the socket')
-    })
-
-    if (socket === undefined) {
-      return
-    }
-
-    // const jwt = await sign(loginJwt, this.privateKey)
-    logger.debug(`uPort access token: ${accessToken}`)
-    logger.debug('Encrypt the access token')
-    const encryptedAccessToken = await this.cipher.encryptString(accessToken)
-
-    // Close the socket once the access token is sent
-    socket.send(encryptedAccessToken, (err) => {
-      if (err !== undefined) {
-        socket.close()
-        return
-      }
-
-      logger.error('Error sending the access token')
-      console.trace(err)
-    })
-
-    res.status(200)
-  }
-
   handleInteraction: RequestHandler = async (req, res, next) => {
     const {
       uid, prompt, params, session
@@ -141,23 +95,38 @@ export default class InteractionController {
 
     switch (prompt.name) {
       case 'loginAndConsent': {
-        // NOTE: To work with uPort, the callback URL MUST use TLS
-        const callbackUrl = `${config.publicUri}/interaction/${uid}/callback`
-        const disclosureOptions = disclosureArgs(scope.split(' '))
-        const reqToken = await this.credentials.createDisclosureRequest({
-          ...disclosureOptions,
-          // TODO: claims Requirements for claims requested from a user. See Claims Specs and Verified Claims
-          notifications: true,
-          callbackUrl
+
+        // Retrieve Veramo identity
+        const identity = await agent.didManagerGetOrCreate({
+          alias: 'OIDCprovider'
+        })      
+        // console.log(identity.did)
+
+        // Extract the disclosure claims
+        const disclosureOptions: any = disclosureArgs(scope.split(' '))
+        
+        // Retrive the claims to disclosure
+        const claimsToDisclosure: any = Object.keys(disclosureOptions.claims?.verifiable || {})
+        
+        // Build an array with the required claims in ICredentialRequestInput format
+        let claimsSdr: any[] = []
+        claimsToDisclosure.forEach(claim => {
+          claimsSdr.push({ claimType: claim })
         })
-
-        const query = message.util.messageToURI(reqToken)
-        const uri = message.util.paramsToQueryString(query, { callback_type: 'post' })
-        const qr = transport.ui.getImageDataURI(uri)
-
+         
+        // Generate the selective disclosure request
+        const rawSdr = await agent.createSelectiveDisclosureRequest({
+          data: {
+            issuer: identity.did,
+            claims: claimsSdr
+          }
+        })
+        // console.log('Raw selective disclosure request')
+        // console.log(rawSdr)
+          
         logger.debug('Login interaction received')
         return res.render('login', {
-          ...options, qr
+          ...options, rawSdr
         })
       }
 
@@ -173,7 +142,6 @@ export default class InteractionController {
         return undefined
     }
   }
-
   loginAndConsent: RequestHandler<InteractionParams, any, LoginBody> = async (req, res, next) => {
     logger.debug('Login method called')
     const details = await this.provider.interactionDetails(req, res)
@@ -186,25 +154,44 @@ export default class InteractionController {
     assert.strictEqual(name, 'loginAndConsent')
 
     if (!req.body.code) { // eslint-disable-line
-      logger.error('No code provided')
-      throw new Error('No code provided')
+      logger.error('No jwt provided')
+      throw new Error('No jwt provided')
     }
 
-    const encryptedAccessToken = req.body.code
-    const accessToken = await this.cipher.decryptString(encryptedAccessToken)
-    let claims: UportClaims
-    try {
-      const discResponse = await this.credentials.authenticateDisclosureResponse(accessToken)
-      claims = fetchClaims(scope.split(' '), discResponse)
-    } catch (err) {
-      console.trace(err)
-      return res.status(400).send({
-        err: 'cannot authenticate the selective disclosure response'
-      })
-    }
+    //const encryptedAccessToken = req.body.code
+    //const accessToken = await this.cipher.decryptString(encryptedAccessToken)
+    const verifiablePresentationJWT: any = req.body.code    
+
+    const verifiablePresentation: any = decodeJWT(verifiablePresentationJWT)    
+    // console.log(verifiablePresentation)
+
+    const verifiableCredentialsArrayJWT: any[] = verifiablePresentation.payload.vp.verifiableCredential
+
+    let trustedVerifiableCredential: any[] = []
+    let untrustedVerifiableCredential: any[] = []
+    verifiableCredentialsArrayJWT.forEach(credentialJWT => {
+      let credential: any = decodeJWT(credentialJWT)
+      // console.log(credential)
+      if(verifiablePresentation.payload.iss === credential.payload.sub) {
+        trustedVerifiableCredential.push(credentialJWT)
+      } else {
+        untrustedVerifiableCredential.push(credentialJWT) 
+      }      
+    })
 
     // Update de session
     // TODO: Resolve the claims properly
+
+    let claims: any
+    claims = {
+      sub: verifiablePresentation.payload.iss,
+      verifiedClaims: {
+        trusted: trustedVerifiableCredential,
+        untrusted: untrustedVerifiableCredential
+      },
+      rejectedScopes: [],
+      nonProvided: []
+    }
 
     // TODO: Check invalid credentials and add them into rejected scopes and claims
     // TODO: Use interaction id as account id
@@ -218,39 +205,37 @@ export default class InteractionController {
       }
     }
 
-    if (claims.rejectedScopes.length === 0) {
-      result = {
-        select_account: {}, // make sure its skipped by the interaction policy since we just logged in
-        login: {
-          account: claims.sub,
-          remember: false
-        },
-        consent: {
-          // any scopes you do not wish to grant go in here
-          //   otherwise details.scopes.new.concat(details.scopes.accepted) will be granted
-          rejectedScopes: [],
+   
+    result = {
+      select_account: {}, // make sure its skipped by the interaction policy since we just logged in
+      login: {
+        account: claims.sub,
+        remember: false
+      },
+      consent: {
+        // any scopes you do not wish to grant go in here
+        //   otherwise details.scopes.new.concat(details.scopes.accepted) will be granted
+        rejectedScopes: [],
 
-          // any claims you do not wish to grant go in here
-          //   otherwise all claims mapped to granted scopes
-          //   and details.claims.new.concat(details.claims.accepted) will be granted
-          rejectedClaims: [],
+        // any claims you do not wish to grant go in here
+        //   otherwise all claims mapped to granted scopes
+        //   and details.claims.new.concat(details.claims.accepted) will be granted
+        rejectedClaims: [],
 
-          // replace = false means previously rejected scopes and claims remain rejected
-          // changing this to true will remove those rejections in favour of just what you rejected above
-          replace: false
-        },
+        // replace = false means previously rejected scopes and claims remain rejected
+        // changing this to true will remove those rejections in favour of just what you rejected above
+        replace: false
+      },
 
-        meta: {
-          ...previousMeta,
-          [scope]: Buffer.from(JSON.stringify(claims)).toString('base64')
-        }
-      }
-    } else {
-      result = {
-        error: 'access_denied',
-        error_description: 'A mandatory verifiable claim is missing or has an untrusted signer'
+      meta: {
+        ...previousMeta,
+        [scope]: Buffer.from(JSON.stringify(claims)).toString('base64')
       }
     }
+    
+    // console.log('result')
+    // console.log(result)
+    
     await this.provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false })
   }
 
