@@ -21,6 +21,9 @@ import { disclosureArgs, /*fetchClaims, UportClaims*/ } from './uport-scopes'
 
 import { agent } from './agent'
 
+//const superagent = require('superagent');
+
+
 
 const { SessionNotFound } = oidcErrors
 const keys = new Set()
@@ -163,7 +166,25 @@ export default class InteractionController {
     const verifiablePresentationJWT: any = req.body.code    
 
     const verifiablePresentation: any = decodeJWT(verifiablePresentationJWT)    
-    // console.log(verifiablePresentation)
+    logger.debug('verifiablePresentation')
+    logger.debug(verifiablePresentation)
+    
+    //TODO: API call to VC service to verify if the presentation contains revoked credentials
+    //let vcServiceResponse = await axios.post(config.verifiableCredentialServiceEndpoint + '/presentation/verify', verifiablePresentation)
+   
+    let vcServiceResponse = {}
+
+    /*
+    TODO: call to VC service
+    try {  
+      const response = await superagent.post('http://vc-service-app:4000').send({ presentationJWT: verifiablePresentationJWT })
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }*/
+
+    logger.debug('vcServiceResponse')
+    logger.debug(vcServiceResponse)
 
     const verifiableCredentialsArrayJWT: any[] = verifiablePresentation.payload.vp.verifiableCredential
 
