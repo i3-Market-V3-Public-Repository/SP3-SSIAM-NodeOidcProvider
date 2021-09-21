@@ -24,16 +24,16 @@ tags:
 
 
 paths:
-  /oidc/.well-known/openid-configuration:
+  /release2/oidc/.well-known/openid-configuration:
     $ref: './paths/oidc/well-known-openid-configuration.yaml#/paths/~1.well-known~1openid-configuration'
 
-  /oidc/jwks:
+  /release2/oidc/jwks:
     $ref: './paths/oidc/jwks.yaml#/paths/~1jwks'
 
-  /oidc/auth:
+  /release2/oidc/auth:
     $ref: "./paths/oidc/auth.yaml#/paths/~1auth"
 
-  /oidc/token:
+  /release2/oidc/token:
     $ref: "./paths/oidc/token.yaml#/paths/~1token"
 
   # /developers/login:

@@ -44,6 +44,8 @@ class Config {
       JWKS_KEYS_PATH: './misc/jwks.json',
       IDENTITY_PATH: './misc/identity.json',
 
+      VC_SERVICE_ENDPOINT: 'http://localhost:4000',
+
       RPC_URL: 'https://rinkeby.infura.io/ethr-did',
       WHITELIST: './misc/whitelist.js'
     }
@@ -166,6 +168,20 @@ class Config {
    */
   get identityPath (): fs.PathLike {
     return this.get('IDENTITY_PATH')
+  }
+
+  /**
+   * @property Context path
+   */
+   get getContextPath (): string {
+    return this.get('CONTEXT_PATH')
+  }
+
+  /**
+   * @property Get VC service endpoint
+   */
+  get verifiableCredentialServiceEndpoint (): string {
+    return this.get('VC_SERVICE_ENDPOINT')
   }
 
   /**
