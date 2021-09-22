@@ -101,7 +101,8 @@ export default class InteractionController {
 
         // Retrieve Veramo identity
         const identity = await agent.didManagerGetOrCreate({
-          alias: 'OIDCprovider'
+          alias: 'OIDCprovider',
+          provider: 'did:ethr:i3m'
         })      
         // console.log(identity.did)
 
