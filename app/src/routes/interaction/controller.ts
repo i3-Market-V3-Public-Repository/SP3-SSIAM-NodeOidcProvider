@@ -18,6 +18,7 @@ import WebSocketServer, { SocketHandler } from '@i3-market/ws'
 import { random, Cipher } from '@i3-market/security'
 
 import { disclosureArgs, /*fetchClaims, UportClaims*/ } from './uport-scopes'
+import { ICredentialRequestInput } from '@veramo/selective-disclosure'
 
 import { agent } from './agent'
 
@@ -107,22 +108,38 @@ export default class InteractionController {
         // console.log(identity.did)
 
         // Extract the disclosure claims
-        const disclosureOptions: any = disclosureArgs(scope.split(' '))
+        /*const disclosureOptions: any = disclosureArgs(scope.split(' '))
         
         // Retrive the claims to disclosure
         const claimsToDisclosure: any = Object.keys(disclosureOptions.claims?.verifiable || {})
         
         // Build an array with the required claims in ICredentialRequestInput format
+        
         let claimsSdr: any[] = []
         claimsToDisclosure.forEach(claim => {
           claimsSdr.push({ claimType: claim })
         })
-         
+
+        console.log('claimsSdr')
+        console.log(claimsSdr)*/
+
+        const claims: ICredentialRequestInput[] = Object
+          .entries(disclosureArgs(scope.split(' ')).claims?.verifiable ?? {})
+          .map(([claimType, claim]) => ({
+            claimType,
+            essential: claim.essential,
+            reason: claim.reason
+          }))
+        
+        /*
+        console.log('claims')
+        console.log(claims)*/
+
         // Generate the selective disclosure request
         const rawSdr = await agent.createSelectiveDisclosureRequest({
           data: {
             issuer: identity.did,
-            claims: claimsSdr
+            claims
           }
         })
         // console.log('Raw selective disclosure request')
