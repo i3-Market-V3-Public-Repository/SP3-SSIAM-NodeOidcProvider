@@ -36,8 +36,8 @@ paths:
   /release2/oidc/token:
     $ref: "./paths/oidc/token.yaml#/paths/~1token"
 
-  # /developers/login:
-  #   $ref: "./paths/developers/login.yaml#/paths/~1login"
+  /release2/developers/login:
+    $ref: "./paths/developers/login.yaml#/paths/~1login"
 
   # /credential/{credentialName}/{did}:
   #   $ref: "./paths/credential.yaml#/paths/~1%7BcredentialName%7D~1%7Bdid%7D"
