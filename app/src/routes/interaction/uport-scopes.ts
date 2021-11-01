@@ -76,6 +76,9 @@ export function disclosureArgs (scopes: string[]): DisclosureRequestParams {
 }
 
 export function fetchClaims (scopes: string[], disclosureRes: DisclosureResponse): UportClaims {
+  console.log(scopes)
+  console.log(disclosureRes)
+  
   const claims: UportClaims = {
     sub: disclosureRes.did,
     verifiedClaims: {
@@ -123,6 +126,7 @@ export function fetchClaims (scopes: string[], disclosureRes: DisclosureResponse
 
   claims.verifiedClaims.trusted = disclosureRes.verified?.filter((vc) => trust.isTrustedDid(vc.iss))
   claims.verifiedClaims.untrusted = disclosureRes.verified?.filter((vc) => !trust.isTrustedDid(vc.iss))
-
+  console.log('claims')
+  console.log(claims)
   return claims
 }
