@@ -22,7 +22,6 @@ import { ICredentialRequestInput } from '@veramo/selective-disclosure'
 
 import { agent } from './agent'
 
-//const superagent = require('superagent');
 
 
 
@@ -189,20 +188,7 @@ export default class InteractionController {
     
     //TODO: API call to VC service to verify if the presentation contains revoked credentials
     //let vcServiceResponse = await axios.post(config.verifiableCredentialServiceEndpoint + '/presentation/verify', verifiablePresentation)
-   
-    let vcServiceResponse = {}
 
-    /*
-    TODO: call to VC service
-    try {  
-      const response = await superagent.post('http://vc-service-app:4000').send({ presentationJWT: verifiablePresentationJWT })
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }*/
-
-    logger.debug('vcServiceResponse')
-    logger.debug(vcServiceResponse)
 
     const verifiableCredentialsArrayJWT: any[] = verifiablePresentation.payload.vp.verifiableCredential
 
