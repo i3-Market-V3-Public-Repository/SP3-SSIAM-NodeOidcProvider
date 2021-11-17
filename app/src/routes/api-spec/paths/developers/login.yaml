@@ -10,22 +10,8 @@ paths:
       summary: Obtain a valid initial_access_token for registering a new client.
       description: |
         Obtain a valid initial_access_token for registering a new client. Use that token as a bearer authentication token with this endpoint to register a new client with a POST of a JSON to [/oidc/reg](/oidc/reg).
-        
-        Example POST:
-        
-        ```json
-        {
-          "grant_types": [ "authorization_code" ],
-          "token_endpoint_auth_method": "client_secret_jwt",
-          "redirect_uris":
-            ["https://client.example.org/callback",
-              "https://client.example.org/callback2"],
-          "client_name": "My Example",
-          "id_token_signed_response_alg": "EdDSA"
-        }
-        ```
-        
-        (TO BE INCLUDED IN THE SPEC UI, you can just test it with postman)
+        Email: test@i3-market.eu
+        Pass: i3market
       tags:
         - Developers
       security:

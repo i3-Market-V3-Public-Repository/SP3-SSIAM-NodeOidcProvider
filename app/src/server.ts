@@ -89,13 +89,11 @@ export async function main (): Promise<void> {
   }
 
   // Add endpoints
-  addEndpoint(app, wss, '/release2/', await defaultEndpoint(app, wss))
-  addEndpoint(app, wss, '/release2/api-spec', await apiSpecEndpoint(app, wss))
-  addEndpoint(app, wss, '/release2/oidc', await oidcEndpoint(app, wss))
-  addEndpoint(app, wss, '/release2/interaction', await interactionEndpoint(app, wss))
-  // addEndpoint(app, wss, '/credential', await credentialEndpoint(app, wss))
-  // addEndpoint(app, wss, '/did', await didEndpoint(app, wss))
-  addEndpoint(app, wss, '/release2/developers', await developersEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/`, await defaultEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/api-spec`, await apiSpecEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/oidc`, await oidcEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/interaction`, await interactionEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/developers`, await developersEndpoint(app, wss))
 
   // Add static files (css and js)
   const publicDir = path.resolve(__dirname, 'public')
@@ -106,9 +104,9 @@ export async function main (): Promise<void> {
 
   // Log connection information
   logger.info(`Application is listening on port ${config.port}`)
-  logger.info(`OIDC Provider Discovery endpoint at ${publicUri}/oidc/.well-known/openid-configuration`)
-  logger.info(`OpenAPI JSON spec at ${publicUri}/api-spec/openapi.json`)
-  logger.info(`OpenAPI browsable spec at ${publicUri}/api-spec/ui`)
+  logger.info(`OIDC Provider Discovery endpoint at ${publicUri}${config.getContextPath}/oidc/.well-known/openid-configuration`)
+  logger.info(`OpenAPI JSON spec at ${publicUri}${config.getContextPath}/api-spec/openapi.json`)
+  logger.info(`OpenAPI browsable spec at ${publicUri}${config.getContextPath}/api-spec/ui`)
 }
 
 export function onError (reason?: Error): void {
