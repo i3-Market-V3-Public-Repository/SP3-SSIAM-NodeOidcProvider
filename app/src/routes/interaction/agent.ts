@@ -27,10 +27,10 @@ import { JwtMessageHandler } from '@veramo/did-jwt'
 import { CredentialIssuer, ICredentialIssuer, W3cMessageHandler } from '@veramo/credential-w3c'
 
 // Custom resolvers
-import { DIDResolverPlugin } from '@veramo/did-resolver'
-import { Resolver } from 'did-resolver'
-import { getResolver as ethrDidResolver } from 'ethr-did-resolver'
-import { getResolver as webDidResolver } from 'web-did-resolver'
+// import { DIDResolverPlugin } from '@veramo/did-resolver'
+// import { Resolver } from 'did-resolver'
+//import { getResolver as ethrDidResolver } from 'ethr-did-resolver'
+//import { getResolver as webDidResolver } from 'web-did-resolver'
 
 // Storage plugin using TypeOrm
 import { Entities, KeyStore, DIDStore, IDataStoreORM, DataStore, DataStoreORM } from '@veramo/data-store'
@@ -70,6 +70,7 @@ const i3marketProviderData = {
   rpcUrl: 'http://95.211.3.250:8545'
 }
 
+/*
 const resolvers = {
   ...ethrDidResolver({
     networks: [rinkebyProviderData, ganacheProviderData, i3marketProviderData]
@@ -79,9 +80,9 @@ const resolvers = {
       }))
   }),
   ...webDidResolver(),
-}
+}*/
 
-export const resolver = new Resolver(resolvers)
+// export const resolver = new Resolver(resolvers)
 
 export const agent = createAgent<
   IDIDManager & IKeyManager & IDataStore & IDataStoreORM & IResolver &
@@ -118,8 +119,8 @@ export const agent = createAgent<
         new W3cMessageHandler(),
       ]
     }),
-    new DIDResolverPlugin({
+    /*new DIDResolverPlugin({
       resolver
-    }),
+    }),*/
   ],
 })

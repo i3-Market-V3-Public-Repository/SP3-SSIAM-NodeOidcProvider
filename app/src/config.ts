@@ -28,10 +28,11 @@ class Config {
     this.defaults = {
 
       NODE_ENV: 'development',
-      SERVER_PUBLIC_URI: 'http://localhost:3000',
-      HOST_PORT: '3000',
+      SERVER_PUBLIC_URI: 'http://localhost:3300',
+      HOST_PORT: '3300',
+      SERVER_PORT: '3300',
 
-      REVER_PROXY: '0',
+      REVERSE_PROXY: '0',
       USE_NGROK: '0',
       USE_LOCALHOST_RUN: '0',
 
@@ -121,7 +122,7 @@ class Config {
     * @property Server port
     */
   get port (): number {
-    return 3000
+    return this.get('SERVER_PORT', this.fromInteger)
   }
 
   /**
