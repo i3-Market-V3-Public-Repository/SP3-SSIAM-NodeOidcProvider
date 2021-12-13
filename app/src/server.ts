@@ -27,6 +27,8 @@ async function listenPromise (server: http.Server, port: number): Promise<void> 
 export async function main (): Promise<void> {
   if (config.isProd) {
     logger.info('Using production environment')
+  } else {
+    logger.info('Using development environment')
   }
 
   // Connect adapter to database if needed
