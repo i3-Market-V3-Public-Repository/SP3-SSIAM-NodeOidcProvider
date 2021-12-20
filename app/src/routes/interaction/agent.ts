@@ -27,10 +27,10 @@ import { JwtMessageHandler } from '@veramo/did-jwt'
 import { CredentialIssuer, ICredentialIssuer, W3cMessageHandler } from '@veramo/credential-w3c'
 
 // Custom resolvers
-import { DIDResolverPlugin } from '@veramo/did-resolver'
-import { Resolver } from 'did-resolver'
-import { getResolver as ethrDidResolver } from 'ethr-did-resolver'
-import { getResolver as webDidResolver } from 'web-did-resolver'
+// import { DIDResolverPlugin } from '@veramo/did-resolver'
+// import { Resolver } from 'did-resolver'
+//import { getResolver as ethrDidResolver } from 'ethr-did-resolver'
+//import { getResolver as webDidResolver } from 'web-did-resolver'
 
 // Storage plugin using TypeOrm
 import { Entities, KeyStore, DIDStore, IDataStoreORM, DataStore, DataStoreORM } from '@veramo/data-store'
@@ -64,18 +64,25 @@ const ganacheProviderData = {
   rpcUrl: 'http://127.0.0.1:7545',
 }
 
+const i3marketProviderData = {
+  defaultKms: 'local',
+  network: 'i3m',
+  rpcUrl: 'http://95.211.3.250:8545'
+}
+
+/*
 const resolvers = {
   ...ethrDidResolver({
-    networks: [rinkebyProviderData, ganacheProviderData]
+    networks: [rinkebyProviderData, ganacheProviderData, i3marketProviderData]
       .map(({network, rpcUrl}) => ({
         name: network,
         rpcUrl
       }))
   }),
   ...webDidResolver(),
-}
+}*/
 
-export const resolver = new Resolver(resolvers)
+// export const resolver = new Resolver(resolvers)
 
 export const agent = createAgent<
   IDIDManager & IKeyManager & IDataStore & IDataStoreORM & IResolver &
@@ -95,6 +102,7 @@ export const agent = createAgent<
       providers: {
         'did:ethr:rinkeby': new EthrDIDProvider(rinkebyProviderData),
         'did:ethr:ganache': new EthrDIDProvider(ganacheProviderData),
+        'did:ethr:i3m': new EthrDIDProvider(i3marketProviderData),
         'did:web': new WebDIDProvider({
           defaultKms: 'local',
         }),
@@ -111,8 +119,8 @@ export const agent = createAgent<
         new W3cMessageHandler(),
       ]
     }),
-    new DIDResolverPlugin({
+    /*new DIDResolverPlugin({
       resolver
-    }),
+    }),*/
   ],
 })

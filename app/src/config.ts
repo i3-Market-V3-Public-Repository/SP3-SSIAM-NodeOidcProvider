@@ -24,25 +24,36 @@ class Config {
   protected _host?: string
 
   constructor () {
-    const defaultPort = '3000'
 
     this.defaults = {
+
       NODE_ENV: 'development',
+      SERVER_PUBLIC_URI: 'http://localhost:3300',
+      HOST_PORT: '3300',
+      SERVER_PORT: '3300',
 
-      SERVER_PUBLIC_URI: 'http://localhost:3000',
-      HOST_PORT: defaultPort,
-
-      REVER_PROXY: '0',
+      REVERSE_PROXY: '0',
       USE_NGROK: '0',
       USE_LOCALHOST_RUN: '0',
 
       OIDC_PROVIDER_ISSUER: undefined,
       OIDC_PROVIDER_DB_HOST: 'localhost',
       OIDC_PROVIDER_DB_PORT: '27017',
+      OIDC_PROVIDER_DB_USERNAME: 'oidp',
+      OIDC_PROVIDER_DB_PASSWORD: 'QGZ4w625UMufe2QT',
+      OIDC_PROVIDER_DB_DATABASE: 'oidp',
+
+      MONGO_INITDB_ROOT_USERNAME: 'oidp',
+      MONGO_INITDB_ROOT_PASSWORD: 'QGZ4w625UMufe2QT',
+      MONGO_INITDB_DATABASE: 'oidp',
 
       COOKIES_KEYS: generateRandomStrings(32, 3).join(','),
+
       JWKS_KEYS_PATH: './misc/jwks.json',
       IDENTITY_PATH: './misc/identity.json',
+      CONTEXT_PATH: '/release2',
+
+      VC_SERVICE_ENDPOINT: 'http://localhost:4000',
 
       RPC_URL: 'https://rinkeby.infura.io/ethr-did',
       WHITELIST: './misc/whitelist.js'
@@ -111,7 +122,7 @@ class Config {
     * @property Server port
     */
   get port (): number {
-    return 3000
+    return this.get('SERVER_PORT', this.fromInteger)
   }
 
   /**
@@ -166,6 +177,20 @@ class Config {
    */
   get identityPath (): fs.PathLike {
     return this.get('IDENTITY_PATH')
+  }
+
+  /**
+   * @property Context path
+   */
+   get getContextPath (): string {
+    return this.get('CONTEXT_PATH')
+  }
+
+  /**
+   * @property Get VC service endpoint
+   */
+  get verifiableCredentialServiceEndpoint (): string {
+    return this.get('VC_SERVICE_ENDPOINT')
   }
 
   /**

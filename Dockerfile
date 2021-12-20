@@ -15,6 +15,6 @@ COPY ./db/ /app/default/
 WORKDIR /app
 RUN npm i --only=prod
 
-EXPOSE 3000
+EXPOSE 3300
 
 CMD ["entrypoint"]
