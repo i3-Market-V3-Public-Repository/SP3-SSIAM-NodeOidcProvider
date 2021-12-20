@@ -13,7 +13,7 @@ export default (): Configuration['interactions'] => {
   return {
     policy: [loginAndConsent],
     url: (ctx, interaction) => {
-      return `/interaction/${ctx.oidc.uid}`
+      return `/release2/interaction/${ctx.oidc.uid}`
     }
   }
 }

@@ -4,10 +4,10 @@ import * as querystring from 'querystring'
 import { inspect } from 'util'
 import { isEmpty } from 'lodash'
 import Provider, { errors as oidcErrors, InteractionResults } from 'oidc-provider'
-import { Credentials, SimpleSigner } from 'uport-credentials'
+// import { Credentials, SimpleSigner } from 'uport-credentials'
 // import { message, transport } from 'uport-transports'
-import { getResolver } from 'ethr-did-resolver'
-import { Resolver } from 'did-resolver'
+// import { getResolver } from 'ethr-did-resolver'
+// import { Resolver } from 'did-resolver'
 import { decodeJWT } from "did-jwt"
 
 import logger from '@i3-market/logger'
@@ -18,9 +18,9 @@ import WebSocketServer, { SocketHandler } from '@i3-market/ws'
 import { random, Cipher } from '@i3-market/security'
 
 import { disclosureArgs, /*fetchClaims, UportClaims*/ } from './uport-scopes'
+import { ICredentialRequestInput } from '@veramo/selective-disclosure'
 
 import { agent } from './agent'
-
 
 const { SessionNotFound } = oidcErrors
 const keys = new Set()
@@ -40,24 +40,25 @@ interface InteractionParams extends Params { uid: string }
 interface LoginBody { code?: string }
 
 export default class InteractionController {
-  protected credentials: Credentials
+  // protected credentials: Credentials
   protected cipher: Cipher
 
-  constructor (protected provider: Provider,
-    protected wss: WebSocketServer) { }
+  constructor (protected provider: Provider, protected wss: WebSocketServer) { }
 
   public async initialize (): Promise<void> {
-    const providerConfig = { rpcUrl: config.rpcUrl }
-    const identity = await config.identityPromise
+    // const providerConfig = { rpcUrl: config.rpcUrl }
+    // const identity = await config.identityPromise
 
+    /*
     this.credentials = new Credentials({
       did: identity.did,
       signer: SimpleSigner(identity.privateKey),
       resolver: new Resolver(getResolver(providerConfig))
-    })
+    })*/
 
     const secret = await random(256 / 8)
     this.cipher = new Cipher('aes-256-gcm', secret)
+    logger.info('controller initialized...')
   }
 
   // WebSocket Methods
@@ -66,17 +67,21 @@ export default class InteractionController {
   }
 
   socketClose: SocketHandler<InteractionParams> = async (socket, req, next) => {
-    logger.debug('Close socket')
+    logger.info('Close socket')
   }
 
   // App Methods
   handleInteraction: RequestHandler = async (req, res, next) => {
+    logger.info('handleInteraction...')
     const {
       uid, prompt, params, session
     } = await this.provider.interactionDetails(req, res)
+    console.log(uid, prompt, params, session)
     const scope = params.scope
 
     const client = await this.provider.Client.find(params.client_id)
+    console.log('client')
+    console.log(client)
     const options = {
       client,
       uid,
@@ -98,40 +103,57 @@ export default class InteractionController {
 
         // Retrieve Veramo identity
         const identity = await agent.didManagerGetOrCreate({
-          alias: 'OIDCprovider'
+          alias: 'OIDCprovider',
+          provider: 'did:ethr:i3m'
         })      
-        // console.log(identity.did)
+        console.log('did:' + identity.did)
 
         // Extract the disclosure claims
-        const disclosureOptions: any = disclosureArgs(scope.split(' '))
+        /*const disclosureOptions: any = disclosureArgs(scope.split(' '))
         
         // Retrive the claims to disclosure
         const claimsToDisclosure: any = Object.keys(disclosureOptions.claims?.verifiable || {})
         
         // Build an array with the required claims in ICredentialRequestInput format
+        
         let claimsSdr: any[] = []
         claimsToDisclosure.forEach(claim => {
           claimsSdr.push({ claimType: claim })
         })
-         
+
+        console.log('claimsSdr')
+        console.log(claimsSdr)*/
+
+        const claims: ICredentialRequestInput[] = Object
+          .entries(disclosureArgs(scope.split(' ')).claims?.verifiable ?? {})
+          .map(([claimType, claim]) => ({
+            claimType,
+            essential: claim.essential,
+            reason: claim.reason
+          }))
+        
+        
+        console.log('claims')
+        console.log(claims)
+
         // Generate the selective disclosure request
         const rawSdr = await agent.createSelectiveDisclosureRequest({
           data: {
             issuer: identity.did,
-            claims: claimsSdr
+            claims
           }
         })
-        // console.log('Raw selective disclosure request')
-        // console.log(rawSdr)
+        console.log('Raw selective disclosure request')
+        console.log(rawSdr)
           
-        logger.debug('Login interaction received')
+        logger.info('Login interaction received')
         return res.render('login', {
           ...options, rawSdr
         })
       }
 
       case 'consent': {
-        logger.debug('Consent interaction received')
+        logger.info('Consent interaction received')
         return res.render('interaction', {
           ...options,
           title: 'Authorize'
@@ -142,8 +164,9 @@ export default class InteractionController {
         return undefined
     }
   }
+
   loginAndConsent: RequestHandler<InteractionParams, any, LoginBody> = async (req, res, next) => {
-    logger.debug('Login method called')
+    logger.info('Login method called')
     const details = await this.provider.interactionDetails(req, res)
 
     const { prompt: { name }, params } = details
@@ -163,7 +186,12 @@ export default class InteractionController {
     const verifiablePresentationJWT: any = req.body.code    
 
     const verifiablePresentation: any = decodeJWT(verifiablePresentationJWT)    
-    // console.log(verifiablePresentation)
+    logger.info('verifiablePresentation')
+    logger.info(verifiablePresentation)
+    
+    //TODO: API call to VC service to verify if the presentation contains revoked credentials
+    //let vcServiceResponse = await axios.post(config.verifiableCredentialServiceEndpoint + '/presentation/verify', verifiablePresentation)
+
 
     const verifiableCredentialsArrayJWT: any[] = verifiablePresentation.payload.vp.verifiableCredential
 
