@@ -1,42 +1,15 @@
 <h3 id="message-box1"></h3>
+<label>Session <span id='session-state'></span></label>
 <script>
 
+    
     // print as debug the sdr    
     console.log('selective disclosure request:')
-    let rawSdr = "<%= rawSdr %>";
+    rawSdr = "<%= rawSdr %>";
     console.log(rawSdr)
+    
+    document.getElementById('message-box1').innerHTML += 'Waiting for the Pairing...';
 
-    document.getElementById('message-box1').innerHTML += 'Waiting for the credential disclosure...';
-
-    var i;
-    sdr = new XMLHttpRequest();  
-    sdr.open('GET', 'http://localhost:8000/disclosure/' + rawSdr, true)
-    new function (i) {  
-        sdr.onreadystatechange = function () {  
-            if (this.readyState === 4 && this.status === 200) { 
-                let response = JSON.parse(this.response)
-                console.log('selective disclosure response:')
-                console.log(this.response)
-
-                // prepare the object to send
-                const form = document.createElement('form')
-                console.log(location.pathname + 'login')
-                form.setAttribute('action', location.pathname + '/login')
-                form.setAttribute('method', 'POST')
-                form.style.display = 'none'
-
-                const codeInput = document.createElement('input')
-                codeInput.setAttribute('name', 'code')
-                codeInput.value = response.jwt
-                form.appendChild(codeInput)
-
-                document.body.appendChild(form)
-                form.submit()
-            } else {
-             
-            }
-        }
-    }(i);  
-    sdr.send();
+        
 </script>
 <script src="/js/login.js"></script>
