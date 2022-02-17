@@ -4,10 +4,6 @@ import * as querystring from 'querystring'
 import { inspect } from 'util'
 import { isEmpty } from 'lodash'
 import Provider, { errors as oidcErrors, InteractionResults } from 'oidc-provider'
-// import { Credentials, SimpleSigner } from 'uport-credentials'
-// import { message, transport } from 'uport-transports'
-// import { getResolver } from 'ethr-did-resolver'
-// import { Resolver } from 'did-resolver'
 import { decodeJWT } from "did-jwt"
 
 import logger from '@i3-market/logger'
@@ -40,7 +36,7 @@ interface InteractionParams extends Params { uid: string }
 interface LoginBody { code?: string }
 
 export default class InteractionController {
-  // protected credentials: Credentials
+
   protected cipher: Cipher
 
   constructor (protected provider: Provider, protected wss: WebSocketServer) { }
@@ -58,7 +54,7 @@ export default class InteractionController {
 
     const secret = await random(256 / 8)
     this.cipher = new Cipher('aes-256-gcm', secret)
-    logger.info('controller initialized...')
+
   }
 
   // WebSocket Methods
@@ -207,9 +203,6 @@ export default class InteractionController {
       }      
     })
 
-    // Update de session
-    // TODO: Resolve the claims properly
-
     let claims: any
     claims = {
       sub: verifiablePresentation.payload.iss,
@@ -254,7 +247,7 @@ export default class InteractionController {
         // changing this to true will remove those rejections in favour of just what you rejected above
         replace: false
       },
-
+      
       meta: {
         ...previousMeta,
         [scope]: Buffer.from(JSON.stringify(claims)).toString('base64')
