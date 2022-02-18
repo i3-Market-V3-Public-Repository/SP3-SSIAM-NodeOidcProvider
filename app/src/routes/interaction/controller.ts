@@ -5,6 +5,9 @@ import { inspect } from 'util'
 import { isEmpty } from 'lodash'
 import Provider, { errors as oidcErrors, InteractionResults } from 'oidc-provider'
 import { decodeJWT } from "did-jwt"
+const web3 = require("web3");
+var Contract = require('web3-eth-contract');
+import { ethers } from 'ethers'
 
 import logger from '@i3-market/logger'
 import config from '@i3-market/config'
@@ -38,19 +41,167 @@ interface LoginBody { code?: string }
 export default class InteractionController {
 
   protected cipher: Cipher
+  protected smartcontract: any;
+  protected smartcontractIssuer: any;
+  protected identity: any;
+  protected contractAddress: string;
+  protected contractAddressIssuer: string;
+  protected contract: any;
+  protected contractIssuer: any;
+  protected ethersProvider: ethers.providers.JsonRpcProvider;
 
   constructor (protected provider: Provider, protected wss: WebSocketServer) { }
 
   public async initialize (): Promise<void> {
-    // const providerConfig = { rpcUrl: config.rpcUrl }
-    // const identity = await config.identityPromise
+    // initialize credential registry contract
+    Contract.setProvider(config.rpcUrl); 
+    this.identity = await config.identityPromise;
+    this.smartcontract = {
+      "abi": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "issuer",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "digest",
+            "type": "bytes32"
+          }
+        ],
+        "name": "Revoked",
+        "type": "event"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "digest",
+            "type": "bytes32"
+          }
+        ],
+        "name": "revoke",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "issuer",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "digest",
+            "type": "bytes32"
+          }
+        ],
+        "name": "revoked",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+    };       
+    
+    this.contractAddress = config.smartContractRegistry;
+    this.contract = new Contract(this.smartcontract.abi, this.contractAddress);
+    this.smartcontractIssuer = {
+      "abi": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "truster",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "issuer",
+            "type": "address"
+          }
+        ],
+        "name": "Trusted",
+        "type": "event"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_wallet",
+            "type": "address"
+          }
+        ],
+        "name": "addIssuer",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_wallet",
+            "type": "address"
+          }
+        ],
+        "name": "isTrusted",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_wallet",
+            "type": "address"
+          }
+        ],
+        "name": "removeIssuer",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
+    };    
+    this.contractAddressIssuer = config.smartContractIssuers;
+    this.contractIssuer = new Contract(this.smartcontractIssuer.abi, this.contractAddressIssuer);
 
-    /*
-    this.credentials = new Credentials({
-      did: identity.did,
-      signer: SimpleSigner(identity.privateKey),
-      resolver: new Resolver(getResolver(providerConfig))
-    })*/
+    // initialize ethers js rpc
+    this.ethersProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
 
     const secret = await random(256 / 8)
     this.cipher = new Cipher('aes-256-gcm', secret)
@@ -68,7 +219,6 @@ export default class InteractionController {
 
   // App Methods
   handleInteraction: RequestHandler = async (req, res, next) => {
-    logger.info('handleInteraction...')
     const {
       uid, prompt, params, session
     } = await this.provider.interactionDetails(req, res)
@@ -76,8 +226,6 @@ export default class InteractionController {
     const scope = params.scope
 
     const client = await this.provider.Client.find(params.client_id)
-    console.log('client')
-    console.log(client)
     const options = {
       client,
       uid,
@@ -102,23 +250,6 @@ export default class InteractionController {
           alias: 'OIDCprovider',
           provider: 'did:ethr:i3m'
         })      
-        console.log('did:' + identity.did)
-
-        // Extract the disclosure claims
-        /*const disclosureOptions: any = disclosureArgs(scope.split(' '))
-        
-        // Retrive the claims to disclosure
-        const claimsToDisclosure: any = Object.keys(disclosureOptions.claims?.verifiable || {})
-        
-        // Build an array with the required claims in ICredentialRequestInput format
-        
-        let claimsSdr: any[] = []
-        claimsToDisclosure.forEach(claim => {
-          claimsSdr.push({ claimType: claim })
-        })
-
-        console.log('claimsSdr')
-        console.log(claimsSdr)*/
 
         const claims: ICredentialRequestInput[] = Object
           .entries(disclosureArgs(scope.split(' ')).claims?.verifiable ?? {})
@@ -127,10 +258,6 @@ export default class InteractionController {
             essential: claim.essential,
             reason: claim.reason
           }))
-        
-        
-        console.log('claims')
-        console.log(claims)
 
         // Generate the selective disclosure request
         const rawSdr = await agent.createSelectiveDisclosureRequest({
@@ -139,8 +266,8 @@ export default class InteractionController {
             claims
           }
         })
-        console.log('Raw selective disclosure request')
-        console.log(rawSdr)
+        logger.info('Raw selective disclosure request')
+        logger.info(rawSdr)
           
         logger.info('Login interaction received')
         return res.render('login', {
@@ -162,7 +289,6 @@ export default class InteractionController {
   }
 
   loginAndConsent: RequestHandler<InteractionParams, any, LoginBody> = async (req, res, next) => {
-    logger.info('Login method called')
     const details = await this.provider.interactionDetails(req, res)
 
     const { prompt: { name }, params } = details
@@ -180,28 +306,26 @@ export default class InteractionController {
     //const encryptedAccessToken = req.body.code
     //const accessToken = await this.cipher.decryptString(encryptedAccessToken)
     const verifiablePresentationJWT: any = req.body.code    
-
-    const verifiablePresentation: any = decodeJWT(verifiablePresentationJWT)    
-    logger.info('verifiablePresentation')
-    logger.info(verifiablePresentation)
-    
-    //TODO: API call to VC service to verify if the presentation contains revoked credentials
-    //let vcServiceResponse = await axios.post(config.verifiableCredentialServiceEndpoint + '/presentation/verify', verifiablePresentation)
-
-
+    const verifiablePresentation: any = decodeJWT(verifiablePresentationJWT)        
     const verifiableCredentialsArrayJWT: any[] = verifiablePresentation.payload.vp.verifiableCredential
 
-    let trustedVerifiableCredential: any[] = []
-    let untrustedVerifiableCredential: any[] = []
-    verifiableCredentialsArrayJWT.forEach(credentialJWT => {
-      let credential: any = decodeJWT(credentialJWT)
-      // console.log(credential)
-      if(verifiablePresentation.payload.iss === credential.payload.sub) {
-        trustedVerifiableCredential.push(credentialJWT)
+    let trustedVerifiableCredential: string[] = []
+    let untrustedVerifiableCredential: string[] = []
+
+    for (const credentialJWT of verifiableCredentialsArrayJWT) {
+      const res = await this.verifyCredentialByJWT(credentialJWT)
+      const credential = decodeJWT(credentialJWT)
+      if(res.status === 0) {
+        if(verifiablePresentation.payload.iss === credential.payload.sub) {          
+          trustedVerifiableCredential.push(credentialJWT)
+        } else {
+          untrustedVerifiableCredential.push(credentialJWT)
+        }
       } else {
-        untrustedVerifiableCredential.push(credentialJWT) 
-      }      
-    })
+        untrustedVerifiableCredential.push(credentialJWT)
+      }          
+      
+    }
 
     let claims: any
     claims = {
@@ -214,8 +338,7 @@ export default class InteractionController {
       nonProvided: []
     }
 
-    // TODO: Check invalid credentials and add them into rejected scopes and claims
-    // TODO: Use interaction id as account id
+
     let result: InteractionResults
     let previousMeta: any = {}
 
@@ -253,14 +376,10 @@ export default class InteractionController {
         [scope]: Buffer.from(JSON.stringify(claims)).toString('base64')
       }
     }
-    
-    // console.log('result')
-    // console.log(result)
-    
+        
     await this.provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false })
   }
 
-  // TODO: Remove this??
   abort: RequestHandler = async (req, res, next) => {
     const result = {
       error: 'access_denied',
@@ -279,5 +398,67 @@ export default class InteractionController {
     } else {
       next(err)
     }
+  }
+
+  async verifyCredentialByJWT(credentialJwt) {   
+            
+    let decodedJWT;
+    let credentialIssuer;
+
+    // check if the credential passed in input is actually a W3C verifiable credential      
+    try {
+
+      decodedJWT = decodeJWT(credentialJwt)
+
+      // remove blockchain prefix from address (e.g. did:ethr:rinkeby:) to extract the issuer address
+      const index = decodedJWT.payload.iss.indexOf("0x")   
+      credentialIssuer = decodedJWT.payload.iss.substring(index)      
+
+    } catch (error) {
+
+      return({ 
+        error: 'error: invalid verifiable credential', 
+        log: 'The jwt passed in input does not represent a W3C verifiable credential'
+      })
+    }     
+
+    // Generate the digest from the JWT of the credential
+    const digest = web3.utils.sha3(credentialJwt).toString('hex')
+
+    const revoker = credentialIssuer;    
+
+    try {
+      // Call the smart contract function 
+      let blockNumber = await this.contract.methods.revoked(revoker, digest).call()
+
+      if(blockNumber === '0') {
+        // credential valid, now check the if the credential issuer is valid, otherwise send an error (status 2)
+        let blockNumberIssuer = await this.contractIssuer.methods.isTrusted(credentialIssuer).call()
+        
+        if(blockNumberIssuer === '0') {        
+          return({ 
+            status: 2,
+            message: 'untrusted credential issuer' 
+          })
+        }
+
+        return({ 
+          status: 0,
+          message: 'credential not revoked' 
+        })
+      } else {
+        return({ 
+          status: 1,
+          message: 'credential revoked', 
+          transactionNumber: blockNumber
+        })
+      }  
+
+    } catch (error) {
+      return({ 
+        error: 'error: something went wrong while executing the transaction', 
+        log: error
+      })
+    }        
   }
 }

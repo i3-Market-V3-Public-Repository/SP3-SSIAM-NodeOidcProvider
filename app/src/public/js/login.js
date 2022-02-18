@@ -82,6 +82,8 @@
     }
 
     const sessionState = document.getElementById('session-state')
+    const disclosureState = document.getElementById('disclosure-state')
+    const credentialState = document.getElementById('credential-state')
 
     const { WalletProtocol, HttpInitiatorTransport, Session } = walletProtocol
     const { openModal, LocalSessionManager } = walletProtocolUtils
@@ -95,13 +97,17 @@
     sessionManager
     .$session
     .subscribe((session) => {
-        sessionState.innerText = session !== undefined ? 'ON' : 'OFF'
+      sessionState.innerText = session !== undefined ? '1. i3Market wallet successfully paired' : 'Missing pairing with i3Market wallet'
         if(session !== undefined) {
             console.log('enabling flow')              
-            const api = new WalletApi(session)     
-            api.disclosure.disclose({ jwt: rawSdr }).then(result => {                
+            const api = new WalletApi(session)
+            disclosureState.innerText = '2. Waiting for the credentials disclosure'     
+            api.disclosure.disclose({ jwt: rawSdr }).then(result => {  
+                            
                 // console.log('selective disclosure response:')
                 // console.log(result.jwt)
+                disclosureState.innerText = '2. Credentials disclosed successfully'
+                credentialState.innerText = '3. Checking the validity of the disclosed credentials..'
 
                 // prepare the object to send
                 const form = document.createElement('form')
