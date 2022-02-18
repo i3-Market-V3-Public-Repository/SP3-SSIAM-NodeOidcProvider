@@ -55,7 +55,14 @@ class Config {
 
       VC_SERVICE_ENDPOINT: 'http://localhost:4000',
 
-      RPC_URL: 'https://rinkeby.infura.io/ethr-did',
+      CONTRACT_ABI: './misc/credential-registry.json',
+      REGISTRY_CONTRACT: '0x43978149D2ae5805a590DB162412aaDfb3f2336e',
+
+      ISSUER_REGISTRY_ABI: './misc/issuer-registry.json',
+      ISSUER_REGISTRY_CONTRACT: '0x7E99D17acECB41aB2131acB26c95A8f90af0d10f',
+
+
+      RPC_URL: 'http://95.211.3.250:8545',
       WHITELIST: './misc/whitelist.js'
     }
   }
@@ -91,6 +98,20 @@ class Config {
     }
 
     return convert(value)
+  }
+
+  /**
+   * @property The endpoint of the smart contract registry for credentials revocation 
+   */
+   get smartContractRegistry (): string {
+    return this.get('REGISTRY_CONTRACT');
+  }
+
+  /**
+   * @property The endpoint of the smart contract registry for issuer
+   */
+  get smartContractIssuers (): string {
+    return this.get('ISSUER_REGISTRY_CONTRACT');
   }
 
   /**
