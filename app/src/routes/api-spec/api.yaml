@@ -76,7 +76,7 @@ paths:
       responses:
         "200":
           description: Rely party client account created
-        default:
+        "500":
           description: unexpected error
           content:
             application/json:
