@@ -7,6 +7,18 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 
+
+#servers:
+#  - url: http://{host}/{contextPath}
+#    variables:
+#      host:
+#        default: localhost:3000
+#        description: Address or domain of the server
+#      contextPath:
+#        default: release2
+#        description: Context path of the service
+
+
 tags:
   - name: OIDC Core
     description: |
@@ -24,25 +36,62 @@ tags:
 
 
 paths:
-  /oidc/.well-known/openid-configuration:
+  /release2/oidc/.well-known/openid-configuration:
     $ref: './paths/oidc/well-known-openid-configuration.yaml#/paths/~1.well-known~1openid-configuration'
 
-  /oidc/jwks:
+  /release2/oidc/jwks:
     $ref: './paths/oidc/jwks.yaml#/paths/~1jwks'
 
-  /oidc/auth:
+  /release2/oidc/auth:
     $ref: "./paths/oidc/auth.yaml#/paths/~1auth"
 
-  /oidc/token:
+  /release2/oidc/token:
     $ref: "./paths/oidc/token.yaml#/paths/~1token"
 
-  # /developers/login:
-  #   $ref: "./paths/developers/login.yaml#/paths/~1login"
+  /release2/developers/login:
+    $ref: "./paths/developers/login.yaml#/paths/~1login"
 
-  # /credential/{credentialName}/{did}:
-  #   $ref: "./paths/credential.yaml#/paths/~1%7BcredentialName%7D~1%7Bdid%7D"
+  /release2/oidc/reg:
+    post:
+      summary: Registering a new client.
+      description: |
+        Register a new client. You have to authenticate this API with a bearer JWT "initialAccessToken" retrieved with the API /developers/lgin
+      tags:
+        - Developers
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              grant_types: [ "authorization_code" ]
+              token_endpoint_auth_method: "client_secret_jwt"
+              redirect_uris: ["https://client.example.org/callback", "https://client.example.org/callback2"]
+              client_name: "My Example"
+              id_token_signed_response_alg: "EdDSA"
+
+      responses:
+        "200":
+          description: Rely party client account created
+        "500":
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "schema/error.yaml#/Error"
 
 components:
   securitySchemes:
     BasicAuth:
-      $ref: "./security-schemes/basic.yaml#/basicAuth"
+      $ref: "./security-schemes/basic.yaml#/basicAuth"    
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    
+  
+security:
+  - bearerAuth: []     

@@ -1,10 +1,14 @@
-version: '3.6'
+# docker-compose.yaml template
+version: '3.4'
 
 services:
   oidc-provider-app:
-    image: registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider
+    #image: registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider
+    image: i3market/oidc-provider-app
     container_name: oidc-provider-app
     restart: unless-stopped
+    ports:
+      - 3300:3300
     env_file:
       - .env
     networks:

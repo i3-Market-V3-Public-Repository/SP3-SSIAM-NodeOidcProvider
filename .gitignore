@@ -19,3 +19,7 @@ db/scripts/mongo-init.js
 .env
 
 .DS_Store
+
+.vscode/settings.json
+
+app/database.sqlite

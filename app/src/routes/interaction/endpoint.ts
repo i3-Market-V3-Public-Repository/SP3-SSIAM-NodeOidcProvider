@@ -49,8 +49,7 @@ const endpoint: EndpointLoader = async (app, wss) => {
   appRouter.get('/:uid', setNoCache, nextIfError(controller.handleInteraction))
   appRouter.post('/:uid/login', setNoCache, body, nextIfError(controller.loginAndConsent))
   appRouter.get('/:uid/abort', setNoCache, nextIfError(controller.abort))
-  appRouter.post('/:uid/callback', setNoCache, body, nextIfError(controller.callback))
-
+  
   // Setup ws routes
   wsRouter.connect('/:uid/socket', controller.socketConnect)
   wsRouter.close('/:uid/socket', controller.socketClose)
