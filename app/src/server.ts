@@ -11,7 +11,7 @@ import WebSocketServer from './ws'
 import passportPromise from './passport'
 import { jwks, did } from './security'
 
-import { defaultEndpoint, oidcEndpoint, interactionEndpoint, apiSpecEndpoint } from './routes'
+import { defaultEndpoint, oidcEndpoint, interactionEndpoint, apiSpecEndpoint, developersEndpoint } from './routes'
 
 /// ///////
 
@@ -27,6 +27,8 @@ async function listenPromise (server: http.Server, port: number): Promise<void> 
 export async function main (): Promise<void> {
   if (config.isProd) {
     logger.info('Using production environment')
+  } else {
+    logger.info('Using development environment')
   }
 
   // Connect adapter to database if needed
@@ -89,13 +91,11 @@ export async function main (): Promise<void> {
   }
 
   // Add endpoints
-  addEndpoint(app, wss, '/', await defaultEndpoint(app, wss))
-  addEndpoint(app, wss, '/api-spec', await apiSpecEndpoint(app, wss))
-  addEndpoint(app, wss, '/oidc', await oidcEndpoint(app, wss))
-  addEndpoint(app, wss, '/interaction', await interactionEndpoint(app, wss))
-  // addEndpoint(app, wss, '/credential', await credentialEndpoint(app, wss))
-  // addEndpoint(app, wss, '/did', await didEndpoint(app, wss))
-  // addEndpoint(app, wss, '/developers', await developersEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/`, await defaultEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/api-spec`, await apiSpecEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/oidc`, await oidcEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/interaction`, await interactionEndpoint(app, wss))
+  addEndpoint(app, wss, `${config.getContextPath}/developers`, await developersEndpoint(app, wss))
 
   // Add static files (css and js)
   const publicDir = path.resolve(__dirname, 'public')
@@ -106,9 +106,9 @@ export async function main (): Promise<void> {
 
   // Log connection information
   logger.info(`Application is listening on port ${config.port}`)
-  logger.info(`OIDC Provider Discovery endpoint at ${publicUri}/oidc/.well-known/openid-configuration`)
-  logger.info(`OpenAPI JSON spec at ${publicUri}/api-spec/openapi.json`)
-  logger.info(`OpenAPI browsable spec at ${publicUri}/api-spec/ui`)
+  logger.info(`OIDC Provider Discovery endpoint at ${publicUri}${config.getContextPath}/oidc/.well-known/openid-configuration`)
+  logger.info(`OpenAPI JSON spec at ${publicUri}${config.getContextPath}/api-spec/openapi.json`)
+  logger.info(`OpenAPI browsable spec at ${publicUri}${config.getContextPath}/api-spec/ui`)
 }
 
 export function onError (reason?: Error): void {

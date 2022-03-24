@@ -25,6 +25,7 @@ parse_arguments () {
   PULL=0
   QUIET=0
   HELP=0
+  TAG=master
   while [[ $# -gt 0 ]]
   do
   key="$1"
@@ -37,6 +38,11 @@ parse_arguments () {
         ;;
         -p|--pull)
         PULL=1
+        shift # past argument
+        ;;
+        -t|--tag)
+        check_argument $@
+        TAG=$2
         shift # past argument
         ;;
         -h|--help)
@@ -82,6 +88,7 @@ authenticate () {
 
 pull () {
   print_message "----- Pull last version -----"
+  echo $TAG
   docker pull registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider
   docker tag registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider i3market/oidc-provider-app
   print_message "----------"
