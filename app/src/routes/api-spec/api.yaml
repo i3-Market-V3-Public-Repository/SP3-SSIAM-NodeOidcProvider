@@ -7,18 +7,6 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 
-
-#servers:
-#  - url: http://{host}/{contextPath}
-#    variables:
-#      host:
-#        default: localhost:3000
-#        description: Address or domain of the server
-#      contextPath:
-#        default: release2
-#        description: Context path of the service
-
-
 tags:
   - name: OIDC Core
     description: |
@@ -29,29 +17,40 @@ tags:
     description: The OpenID Connect Discovery 1.0 specification defines a mechanism for an OpenID Connect Relying Party to discover the End-User's OpenID Provider and obtain information needed to interact with it, including its OAuth 2.0 endpoint locations.
     externalDocs:
       url: https://openid.net/specs/openid-connect-discovery-1_0.html
-  # - name: Developers
-  #   description: Developers endpoint. Developers can log in to get a valid initial_access_token for regsitering new clients
-  # - name: Credential
-  #   description: Testing endpoint where to obtain consumer/provider credentials
+  - name: Developers
+    description: Developers endpoint. Developers can log in to get a valid initial_access_token for regsitering new clients
 
+servers:
+- url: "{method}://{url}{contextPath}"
+  description: The url of the running instance in the server
+  variables:
+    method:
+      default: http
+      description: http or https
+    url:
+      default: localhost:3300
+      description: server url
+    contextPath:      
+      default: /release2
+      description: context path
 
 paths:
-  /release2/oidc/.well-known/openid-configuration:
+  /oidc/.well-known/openid-configuration:
     $ref: './paths/oidc/well-known-openid-configuration.yaml#/paths/~1.well-known~1openid-configuration'
 
-  /release2/oidc/jwks:
+  /oidc/jwks:
     $ref: './paths/oidc/jwks.yaml#/paths/~1jwks'
 
-  /release2/oidc/auth:
+  /oidc/auth:
     $ref: "./paths/oidc/auth.yaml#/paths/~1auth"
 
-  /release2/oidc/token:
+  /oidc/token:
     $ref: "./paths/oidc/token.yaml#/paths/~1token"
 
-  /release2/developers/login:
+  /developers/login:
     $ref: "./paths/developers/login.yaml#/paths/~1login"
 
-  /release2/oidc/reg:
+  /oidc/reg:
     post:
       summary: Registering a new client.
       description: |

@@ -76,7 +76,6 @@ export async function main (): Promise<void> {
   app.use(loggerMiddleware)
 
   /**
-   * TODO:
    * Force proto https if reverse proxy. Header x-forwarded-proto must be setted by the proxy
    * Only use this option on development enviromnent!
    */

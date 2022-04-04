@@ -23,3 +23,5 @@ db/scripts/mongo-init.js
 .vscode/settings.json
 
 app/database.sqlite
+
+app/.npmrc
