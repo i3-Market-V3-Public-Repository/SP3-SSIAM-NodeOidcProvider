@@ -266,7 +266,7 @@ export default class InteractionController {
       const index = decodedJWT.payload.iss.indexOf("0x")  
       credentialIssuer = decodedJWT.payload.iss.substring(index)   
       
-      const res = await axios.post(config.verifiableCredentialServiceEndpoint + '/release2/vc/credential/verify', { credentialJwt, credentialIssuer })  
+      const res = await axios.post(config.verifiableCredentialServiceEndpoint + '/credential/verify', { credentialJwt, credentialIssuer })  
       return res.data;
     } catch (error) {
       logger.error(error)

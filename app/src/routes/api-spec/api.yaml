@@ -20,24 +20,37 @@ tags:
   - name: Developers
     description: Developers endpoint. Developers can log in to get a valid initial_access_token for regsitering new clients
 
+servers:
+- url: "{method}://{url}{contextPath}"
+  description: The url of the running instance in the server
+  variables:
+    method:
+      default: http
+      description: http or https
+    url:
+      default: localhost:3300
+      description: server url
+    contextPath:      
+      default: /release2
+      description: context path
 
 paths:
-  /release2/oidc/.well-known/openid-configuration:
+  /oidc/.well-known/openid-configuration:
     $ref: './paths/oidc/well-known-openid-configuration.yaml#/paths/~1.well-known~1openid-configuration'
 
-  /release2/oidc/jwks:
+  /oidc/jwks:
     $ref: './paths/oidc/jwks.yaml#/paths/~1jwks'
 
-  /release2/oidc/auth:
+  /oidc/auth:
     $ref: "./paths/oidc/auth.yaml#/paths/~1auth"
 
-  /release2/oidc/token:
+  /oidc/token:
     $ref: "./paths/oidc/token.yaml#/paths/~1token"
 
-  /release2/developers/login:
+  /developers/login:
     $ref: "./paths/developers/login.yaml#/paths/~1login"
 
-  /release2/oidc/reg:
+  /oidc/reg:
     post:
       summary: Registering a new client.
       description: |

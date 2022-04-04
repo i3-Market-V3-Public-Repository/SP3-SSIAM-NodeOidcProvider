@@ -1,4 +1,5 @@
 import { interactionPolicy, Configuration } from 'oidc-provider'
+import config from '@i3-market/config'
 
 export default (): Configuration['interactions'] => {
   const basePolicy = interactionPolicy.base()
@@ -13,7 +14,7 @@ export default (): Configuration['interactions'] => {
   return {
     policy: [loginAndConsent],
     url: (ctx, interaction) => {
-      return `/release2/interaction/${ctx.oidc.uid}`
+      return `${config.getContextPath}/interaction/${ctx.oidc.uid}`
     }
   }
 }
