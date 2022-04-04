@@ -11,8 +11,6 @@ COPY ./production.env ./docker-compose.yaml ./app/package.json ./app/package-loc
 COPY ./docker/template ./docker/entrypoint ./docker/init-volumes /usr/local/bin/
 COPY ./app/misc/whitelist.js /app/default/misc/
 COPY ./db/ /app/default/
-COPY ./app/misc/identity.json /app/misc/
-COPY ./app/misc/jwks.json /app/misc/
 
 WORKDIR /app
 RUN npm i --only=prod
