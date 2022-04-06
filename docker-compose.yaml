@@ -1,16 +1,14 @@
-# docker-compose.yaml template
 version: '3.4'
 
 services:
-  oidc-provider-app:
-    #image: registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider
+  oidc-provider-app:    
     image: i3market/oidc-provider-app
     container_name: oidc-provider-app
     restart: unless-stopped
     ports:
       - 3300:3300
     env_file:
-      - .env
+      - .env.oidc
     networks:
       - oidc-net
       - reverse-proxy
@@ -18,6 +16,7 @@ services:
       - ./volumes/misc:/app/misc
     depends_on:
       - oidc-provider-db
+
   oidc-provider-db:
     container_name: oidc-provider-db
     image: mongo:4-bionic
@@ -25,7 +24,7 @@ services:
     networks:
       - oidc-net
     env_file:
-      - .env
+      - .env.oidc
     ports:
       - 27017:27017
     volumes:
@@ -33,6 +32,7 @@ services:
       - ./volumes/scripts:/data/scripts:ro
       - ./volumes/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     command: --quiet --setParameter logLevel=0
+
 networks:
   oidc-net:
   reverse-proxy:

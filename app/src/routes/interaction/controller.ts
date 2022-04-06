@@ -69,7 +69,8 @@ export default class InteractionController {
     const {
       uid, prompt, params, session
     } = await this.provider.interactionDetails(req, res)
-    console.log(uid, prompt, params, session)
+    
+    // console.log(uid, prompt, params, session)
     const scope = params.scope
 
     const client = await this.provider.Client.find(params.client_id)
