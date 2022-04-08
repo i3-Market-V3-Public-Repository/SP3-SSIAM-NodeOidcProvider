@@ -27,12 +27,36 @@ class Config {
 
     this.defaults = {
 
-      /**
-       * Add here your default properties.
-       * 
-       * E.g. NODE_ENV: 'development', SERVER_PUBLIC_URI: 'http://localhost:3300' ...
-       * 
-       */
+      NODE_ENV: 'development',
+      SERVER_PUBLIC_URI: 'http://localhost:3300',
+      HOST_PORT: '3300',
+      SERVER_PORT: '3300',
+
+      REVERSE_PROXY: '0',
+      USE_NGROK: '0',
+      USE_LOCALHOST_RUN: '0',
+
+      OIDC_PROVIDER_ISSUER: undefined,
+      OIDC_PROVIDER_DB_HOST: 'localhost',
+      OIDC_PROVIDER_DB_PORT: '27017',
+      OIDC_PROVIDER_DB_USERNAME: '',
+      OIDC_PROVIDER_DB_PASSWORD: '',
+      OIDC_PROVIDER_DB_DATABASE: '',
+
+      MONGO_INITDB_ROOT_USERNAME: '',
+      MONGO_INITDB_ROOT_PASSWORD: '',
+      MONGO_INITDB_DATABASE: '',
+
+      COOKIES_KEYS: generateRandomStrings(32, 3).join(','),
+
+      JWKS_KEYS_PATH: './misc/jwks.json',
+      IDENTITY_PATH: './misc/identity.json',
+      CONTEXT_PATH: '/release2',
+      VC_SERVICE_ENDPOINT: 'http://localhost:4200/release2/vc',
+
+      RPC_URL: 'http://yourBlockchainUrl:8545',
+      WHITELIST: './misc/whitelist.js'
+      
     }
   }
 
@@ -121,9 +145,9 @@ class Config {
   get mongoUri (): string {
     return [
       'mongodb://',
-            `${this.get('OIDC_PROVIDER_DB_USERNAME')}:${this.get('OIDC_PROVIDER_DB_PASSWORD')}@`,
-            `${this.get('OIDC_PROVIDER_DB_HOST')}:${this.get('OIDC_PROVIDER_DB_PORT')}/`,
-            `${this.get('OIDC_PROVIDER_DB_DATABASE')}?authSource=admin`
+      `${this.get('OIDC_PROVIDER_DB_USERNAME')}:${this.get('OIDC_PROVIDER_DB_PASSWORD')}@`,
+      `${this.get('OIDC_PROVIDER_DB_HOST')}:${this.get('OIDC_PROVIDER_DB_PORT')}/`,
+      `${this.get('OIDC_PROVIDER_DB_DATABASE')}?authSource=admin`
     ].join('')
   }
 

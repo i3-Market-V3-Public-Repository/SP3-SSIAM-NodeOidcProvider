@@ -69,8 +69,7 @@ const i3marketProviderData = {
 
 export const agent = createAgent<
   IDIDManager & IKeyManager & IDataStore & IDataStoreORM & IResolver &
-  ISelectiveDisclosure & IMessageHandler & IDataStore &
-  IDataStoreORM
+  ISelectiveDisclosure & IMessageHandler & IDataStore & IDataStoreORM
 >({
   plugins: [
     new KeyManager({
