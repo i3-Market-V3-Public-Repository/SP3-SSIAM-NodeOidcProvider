@@ -26,6 +26,7 @@ services:
       - reverse-proxy
     depends_on:
       - oidc-provider-db
+
   oidc-provider-db:
     container_name: oidc-provider-db
     image: mongo:4-bionic
@@ -41,6 +42,7 @@ services:
     command: --quiet --setParameter logLevel=0
     networks:
       - oidc-net
+      
 networks:
   oidc-net:
   reverse-proxy:

@@ -1,6 +1,7 @@
 # i3-Market OpenID Provider
 
-An OpenID Provider for i3-Market.
+An OpenID Provider for i3-Market. 
+You can find the detailed documentation [here](https://i3-market.gitlab.io/code/backplane/backplane-api-gateway/backplane-api-specification/systems/trust-security-privacy/ssi-iam/user-centric-authentication.html#troubleshooting).
 
 ## Installation
 
@@ -11,13 +12,24 @@ $ git clone git@gitlab.com:i3-market/code/wp3/t3.1-self-sovereign-identity-and-a
 $ cd node-oidc-provider
 ```
 
-## Development
+## Initial database configuration
 
 A just-working version using a mongodb can be used. Before starting the mongo for the first time, copy `db/scripts/mongo-init.template.js` to `db/scripts/mongo-init.js` and update to your needs. The contents of that file are the intial state of the DB. By default it comes with to RP clients, one for WebApps and another for Native Apps or SPAs; as well as an adminsitration account that can be used to create more clients through the API.
 
-### Usage
+## Local development
 
-Run the following command in the project root. The first time it will take a while (be patience), since it has to build images and download all the npn dependencies.
+```console 
+$ cd node-oidc-provider/app
+$ npm i
+$ npm start
+```
+
+You should also update the configuration file `app/src/config.ts` before running the service. Specifically, it is necessary to fill the default environment variables. 
+
+
+### Local development using Docker
+
+Run the following command in the project root. The first time it will take a while (be patience), since it has to build images and download all the npm dependencies.
 
 ```console
 ./docker-dev-start
@@ -216,10 +228,15 @@ eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InIxTGtiQm8zOTI1UmIyWkZGckt5VTNNVmV4
 }
 ```
 
-## TODO
+## Server deployment
 
-Add to the Readme:
+Create a `oidc.env` file and configure the server using the environmental variables defined in (template.env)[./template.env].
 
-1. How to install OIDC Provider on a server
-2. How to connect using a standard OIDC library
-3. How to register clients for the demo
+To deploy this service in a server it is just necessary to copy the `docker-compose.yaml` and `oidc.env` files in a server directory and run the following command:
+
+```console
+$ docker-compose up
+```
+
+The service images will be downloaded directly from the i3-Market Gitlab image registry.
+You need to have a valid Gitlab access.
