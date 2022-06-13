@@ -3,20 +3,67 @@
 An OpenID Provider for i3-Market. 
 You can find the detailed documentation [here](https://i3-market.gitlab.io/code/backplane/backplane-api-gateway/backplane-api-specification/systems/trust-security-privacy/ssi-iam/user-centric-authentication.html#troubleshooting).
 
-## Installation
+## Table of contents
 
-Clone the repository with
+- [i3-Market Verifiable Credential Service](#i3-market-verifiable-credential-service)
+  * [Project requirements](#project-requirements)
+  * [Cloning the project](#cloning-the-project)
+  * [Initial environment configuration](#initial-environment-configuration)
+  * [Local development using Node.js](#local-development-using-nodejs)
+  * [Local development using docker](#local-development-using-docker)
+      - [Development scripts in the docker container](#development-scripts-in-the-docker-container)
+  * [Building the production image](#building-the-production-image)
+  * [Production deployment](#production-deployment)
+  * [Wallet integration](#wallet-integration)
+  * [Usage and documentations](#usage-and-documentations)
+
+## Project requirements
+
+The following programs and libraries are required to be able to perform all subsequent instructions.
+
+- WSL
+- Git
+- Node.js
+- Docker
+- [i3-Market wallet desktop](http://95.211.3.251:8081/#browse/browse:i3m-raw:i3m-wallet%2F1.0.0), version 1.0.0 or more
+
+To check that everything is fine, you should see the following commands working:
+```console
+$ npm -v
+6.14.8
+$ node -v
+v14.15.1
+$ ts-node -v
+v10.4.0
+$ nvm --version
+0.33.2
+```
+
+>  WARNING: In case some packages are missing, you can install them using the `npm i <PACKAGE_NAME>` command
+
+## Cloning the project
+
+Clone the repository with Git
 
 ```console 
 $ git clone git@gitlab.com:i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider.git
 $ cd node-oidc-provider
 ```
 
+### Initial environment configuration
+
+Create a `.env` and a `oidc.env` file and configure the server using the environmental variables defined in the [template.env](./template.env) file.
+
+> WARNING: Paths should be relative to the `app` directory
+
 ## Initial database configuration
 
 A just-working version using a mongodb can be used. Before starting the mongo for the first time, copy `db/scripts/mongo-init.template.js` to `db/scripts/mongo-init.js` and update to your needs. The contents of that file are the intial state of the DB. By default it comes with to RP clients, one for WebApps and another for Native Apps or SPAs; as well as an adminsitration account that can be used to create more clients through the API.
 
-## Local development
+## Local development using Node.js
+
+To run the service locally using Node.js it is necessary to download it before.
+After that you can install the dependencies and start the service in the following way:
 
 ```console 
 $ cd node-oidc-provider/app
@@ -24,8 +71,8 @@ $ npm i
 $ npm start
 ```
 
-You should also update the configuration file `app/src/config.ts` before running the service. Specifically, it is necessary to fill the default environment variables. 
-
+You should also update the configuration file `app/src/config.ts` before running the service. 
+Specifically, it is necessary to fill the default environment variables, in the same way they are filled in the env file.
 
 ### Local development using Docker
 
@@ -47,7 +94,7 @@ If you want to delete and prune all the created images, containers, networks, vo
 
 Since the `app` directory is shared with the docker container with mapped user permissions, you can just edit any files in the `app` directory locally. The container will be running `ts-node` and `nodemon` to directly execute the source code and refresh the server if any file has changed. You can also attach any debugger in your local machine to the container, which will be listening at default port 9229.
 
-#### Development scripts
+#### Development scripts in the docker container
 
 Besides rebuilding, you can execute any command in the `oidc-provider-app` container:
 
@@ -72,7 +119,7 @@ $ ./node -v
 v14.15.1
 ```
 
-## Production
+## Building the production image
 
 You can build the production docker image using the helpers provided in this repository:
 
@@ -110,13 +157,6 @@ docker-compose up -d
 # Finally configure a reverse proxy. We suggest using the one provided in:
 # https://gitlab.com/i3-market/code/wp3/nginx-reverse-proxy
 ```
-
-### Configuration
-
-Create a `.env` file and configure the server using the environmental variables defined in (template.env)[./template.env].
-
-> WARNING: Paths should be relative to the `app` directory
-
 ## Additional testing
 
 To perform more complex manual tests, we also provide a docker compose service so different images are connected in the same network.
@@ -228,7 +268,7 @@ eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InIxTGtiQm8zOTI1UmIyWkZGckt5VTNNVmV4
 }
 ```
 
-## Server deployment
+## Production deployment
 
 Create a `oidc.env` file and configure the server using the environmental variables defined in (template.env)[./template.env].
 
@@ -240,3 +280,10 @@ $ docker-compose up
 
 The service images will be downloaded directly from the i3-Market Gitlab image registry.
 You need to have a valid Gitlab access.
+
+## Wallet integration
+
+This service is integrated with the i3-Market Wallet desktop application, downloadable from the i3-Market [Nexus repository](http://95.211.3.251:8081/#browse/browse:i3m-raw:i3m-wallet%2F1.0.0) or from [Github](https://github.com/i3-Market-V2-Public-Repository/SP3-SCGBSSW-I3mWalletMonorepo/releases). For information on how to pair the wallet with the service once running, see the instructions [here](./Wallet%20protocol%20integration.pdf).
+
+## Usage and documentations
+The documentation is available on the [i3-Market development portal](https://i3-market.gitlab.io/code/backplane/backplane-api-gateway/backplane-api-specification/systems/trust-security-privacy/ssi-iam/user-centric-authentication.html#troubleshooting).
