@@ -1,14 +1,15 @@
-version: '3.4'
+version: '3.6'
 
 services:
-  oidc-provider-app:    
-    image: i3market/oidc-provider-app
+
+  oidc-provider-app:
+    image: registry.gitlab.com/i3-market/code/wp3/t3.1-self-sovereign-identity-and-access-management/node-oidc-provider:release-2.9.4
     container_name: oidc-provider-app
     restart: unless-stopped
     ports:
       - 3300:3300
     env_file:
-      - .env.oidc
+      - oidc.env
     networks:
       - oidc-net
       - reverse-proxy
@@ -24,7 +25,7 @@ services:
     networks:
       - oidc-net
     env_file:
-      - .env.oidc
+      - oidc.env
     ports:
       - 27017:27017
     volumes:
@@ -37,5 +38,6 @@ networks:
   oidc-net:
   reverse-proxy:
     external: true
+    
 volumes:
   oidc-mongo:
