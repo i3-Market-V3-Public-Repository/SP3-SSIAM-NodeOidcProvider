@@ -61,7 +61,7 @@
     "@veramo/did-provider-web": "^1.2.0",
     "@veramo/did-resolver": "^1.2.0",
     "@veramo/key-manager": "^1.2.0",
-    "@veramo/kms-local": "^1.2.0",
+    "@veramo/kms-local": "^4.2.0",
     "@veramo/message-handler": "^1.2.0",
     "@veramo/selective-disclosure": "^1.2.0",
     "axios": "^0.21.4",
