@@ -29,7 +29,7 @@ services:
 
   oidc-provider-db:
     container_name: oidc-provider-db
-    image: mongo:4-bionic
+    image: mongo:6.0.4
     restart: unless-stopped
     env_file:
       - .env

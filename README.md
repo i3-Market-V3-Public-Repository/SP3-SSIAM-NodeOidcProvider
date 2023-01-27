@@ -30,9 +30,9 @@ The following programs and libraries are required to be able to perform all subs
 To check that everything is fine, you should see the following commands working:
 ```console
 $ npm -v
-6.14.8
+8.13.8
 $ node -v
-v14.15.1
+v18.13.0
 $ ts-node -v
 v10.4.0
 $ nvm --version
@@ -114,9 +114,9 @@ Since `npm` and `node` are likely to be needed, if your OS allows you to execute
 
 ```console
 $ ./npm -v
-6.14.8
+8.19.3
 $ ./node -v
-v14.15.1
+v18.13.0
 ```
 
 ## Building the production image
