@@ -79,7 +79,7 @@
     "morgan": "^1.10.0",
     "oidc-provider": "^6.31.0",
     "openid-client": "^4.4.0",
-    "passport": "^0.4.1",
+    "passport": "^0.6.0",
     "passport-http": "^0.3.0",
     "path-to-regexp": "^6.2.0",
     "sqlite3": "^4.2.0",
